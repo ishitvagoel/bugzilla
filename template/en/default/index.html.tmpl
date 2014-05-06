@@ -14,6 +14,7 @@
    title = "$terms.Bugzilla Main Page"
    header = "Main Page" 
    header_addl_info = "version $constants.BUGZILLA_VERSION"
+   javascript_urls = ["js/yui3/yui/yui-min.js"]
 %]
 
 [% IF release %]
@@ -60,7 +61,26 @@
     [% END %]
   </div>
 [% END %]
+<script type="text/javascript">
+    YUI().use('datatable',function(Y){
+            var columns = ['Sno',"Name","Branch"];
+            var data = [{Sno:"1", Name:"Ishitva" , Branch:"CSE"},
+                        {Sno:"2", Name:"Akshay" , Branch:"CSE"},
+                        {Sno:"3", Name:"Yatendra" , Branch:"CSE"},
+                        {Sno:"4", Name:"Narendra" , Branch:"CSE"},
+                        {Sno:"5", Name:"Prateek" , Branch:"CSE"}, 
+            ];
 
+            var table = new Y.DataTable({
+              columns: columns,
+              data: data,
+              caption:"Test Data Table",
+              summary: "Testing"
+            });
+
+            table.render("#example"); 
+       });
+</script>
 <div id="page-index">
   <h1 id="welcome"> Welcome to [% terms.Bugzilla %]</h1>
   <div class="intro">[% Hook.process('intro') %]</div>
