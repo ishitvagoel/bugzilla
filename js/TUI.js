@@ -17,7 +17,7 @@
  * See template/en/default/bug/create/create.html.tmpl for a usage example.
  */
 
-var TUI_HIDDEN_CLASS = 'bz_tui_hidden';
+var TUI_HIDDEN_CLASS = 'bz_tui_hidden'; 
 var TUI_COOKIE_NAME  = 'TUI';
 
 var TUI_alternates = new Array();
@@ -30,10 +30,10 @@ var TUI_alternates = new Array();
  * @param className   The name of the CSS class to hide.
  */
 function TUI_toggle_class(className) {
-    var elements = YAHOO.util.Dom.getElementsByClassName(className);
-    for (var i = 0; i < elements.length; i++) {
-        bz_toggleClass(elements[i], TUI_HIDDEN_CLASS);
-    }
+    var elements = Y.all(className);
+    
+    elements.toggleClass(TUI_HIDDEN_CLASS);
+    
     _TUI_save_class_state(elements, className);
     _TUI_toggle_control_link(className);
 }
@@ -46,8 +46,8 @@ function TUI_toggle_class(className) {
  * @param className   The class to hide by default.
  */
 function TUI_hide_default(className) {
-    YAHOO.util.Event.onDOMReady(function () {
-        if (!YAHOO.util.Cookie.getSub('TUI', className)) {
+    Y.on('domready', (function () {
+        if (!Y.Cookie.getSub('TUI', className)) {
             TUI_toggle_class(className);
         }
     });
@@ -64,7 +64,7 @@ function _TUI_toggle_control_link(className) {
 function _TUI_save_class_state(elements, aClass) {
     // We just check the first element to see if it's hidden or not, and
     // consider that all elements are the same.
-    if (YAHOO.util.Dom.hasClass(elements[0], TUI_HIDDEN_CLASS)) {
+    if (elements.item(0).hasClass(TUI_HIDDEN_CLASS)) {
         _TUI_store(aClass, 0);
     }
     else {
@@ -73,7 +73,7 @@ function _TUI_save_class_state(elements, aClass) {
 }
 
 function _TUI_store(aClass, state) {
-    YAHOO.util.Cookie.setSub(TUI_COOKIE_NAME, aClass, state,
+    Y.Cookie.setSub(TUI_COOKIE_NAME, aClass, state,
     {
         expires: new Date('January 1, 2038'),
         path: BUGZILLA.param.cookie_path
@@ -81,16 +81,16 @@ function _TUI_store(aClass, state) {
 }
 
 function _TUI_restore() {
-    var yui_classes = YAHOO.util.Cookie.getSubs(TUI_COOKIE_NAME);
+    var yui_classes = Y.Cookie.getSubs(TUI_COOKIE_NAME);
     for (yui_item in yui_classes) {
         if (yui_classes[yui_item] == 0) {
-            var elements = YAHOO.util.Dom.getElementsByClassName(yui_item);
-            for (var i = 0; i < elements.length; i++) {
-                YAHOO.util.Dom.addClass(elements[i], 'bz_tui_hidden');
-            }
+            var elements = Y.all(yui_item);
+            
+            elements.addClass('bz_tui_hidden');
+            
             _TUI_toggle_control_link(yui_item);
         }
     }
 }
 
-YAHOO.util.Event.onDOMReady(_TUI_restore);
+Y.on('domready',_TUI_restore);
