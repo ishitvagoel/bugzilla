@@ -17,7 +17,7 @@
  * See template/en/default/bug/create/create.html.tmpl for a usage example.
  */
 
-var TUI_HIDDEN_CLASS = 'bz_tui_hidden'; 
+var TUI_HIDDEN_CLASS = 'bz_tui_hidden';
 var TUI_COOKIE_NAME  = 'TUI';
 
 var TUI_alternates = new Array();
