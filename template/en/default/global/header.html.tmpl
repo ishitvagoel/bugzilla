@@ -32,6 +32,7 @@
   onload = ""
   style_urls = []
   yui = []
+  yui3 = []
 %]
 
 [% SET yui_css = {
@@ -189,6 +190,12 @@
             [% INCLUDE $yui_template %]
           [% END %]
         [% END %]
+
+        var Y = YUI().use('node'
+          [% FOREACH module = yui3 %]
+            [%~ %],'[% module FILTER js %]'
+          [% END ~%]
+        );
         [% IF javascript %]
           [% javascript %]
         [% END %]
