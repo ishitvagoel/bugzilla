@@ -30,7 +30,7 @@ var TUI_alternates = new Array();
  * @param className   The name of the CSS class to hide.
  */
 function TUI_toggle_class(className) {
-    var elements = Y.all(className);
+    var elements = Y.all('.'+className);
     
     elements.toggleClass(TUI_HIDDEN_CLASS);
     
@@ -83,8 +83,8 @@ function _TUI_store(aClass, state) {
 function _TUI_restore() {
     var yui_classes = Y.Cookie.getSubs(TUI_COOKIE_NAME);
     for (yui_item in yui_classes) {
-        if (yui_classes[yui_item] == 0) {
-            var elements = Y.all(yui_item);
+        if (yui_classes[yui_item] == 0) {   
+            var elements = Y.all('.'+yui_item);
             
             elements.addClass('bz_tui_hidden');
             
