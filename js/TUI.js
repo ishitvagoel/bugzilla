@@ -50,7 +50,7 @@ function TUI_hide_default(className) {
         if (!Y.Cookie.getSub('TUI', className)) {
             TUI_toggle_class(className);
         }
-    });
+    }));
 }
 
 function _TUI_toggle_control_link(className) {
