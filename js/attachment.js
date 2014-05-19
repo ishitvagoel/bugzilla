@@ -13,7 +13,7 @@ function validateAttachmentForm(theform) {
         return false;
     }
     return true;
-} 
+}
 
 function updateCommentPrivacy(checkbox) {
     var text_elem = document.getElementById('comment');
