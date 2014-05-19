@@ -7,13 +7,13 @@
  */
 
 function validateAttachmentForm(theform) {
-    var desc_value = YAHOO.lang.trim(theform.description.value);
+    var desc_value = Y.Lang.trim(theform.description.value);
     if (desc_value == '') {
         alert(BUGZILLA.string.attach_desc_required);
         return false;
     }
     return true;
-}
+} 
 
 function updateCommentPrivacy(checkbox) {
     var text_elem = document.getElementById('comment');
@@ -280,17 +280,17 @@ function switchToMode(mode, patchviewerinstalled)
 
 function hideElementById(id)
 {
-  var elm = document.getElementById(id);
+  var elm = Y.one('#'+id);
   if (elm) {
-    YAHOO.util.Dom.addClass(elm, 'bz_default_hidden');
+    elm.addClass('bz_default_hidden');
   }
 }
 
 function showElementById(id)
 {
-  var elm = document.getElementById(id);
+  var elm = Y.one('#'+id);
   if (elm) {
-    YAHOO.util.Dom.removeClass(elm, 'bz_default_hidden');
+    elm.removeClass('bz_default_hidden');
   }
 }
 
@@ -299,26 +299,26 @@ function normalizeComments()
   // Remove the unused comment field from the document so its contents
   // do not get transmitted back to the server.
 
-  var small = document.getElementById('smallCommentFrame');
-  var big = document.getElementById('editFrame');
-  if ( (small) && YAHOO.util.Dom.hasClass(small, 'bz_default_hidden') )
+  var small = Y.one('#smallCommentFrame');
+  var big = Y.one('#editFrame');
+  if ( (small) && small.hasClass('bz_default_hidden') )
   {
-    small.parentNode.removeChild(small);
+    small.ancestor().removeChild(small);
   }
   if ( (big) && YAHOO.util.Dom.hasClass(big, 'bz_default_hidden') )
   {
-    big.parentNode.removeChild(big);
+    big.ancestor().removeChild(big);
   }
 }
 
 function toggle_attachment_details_visibility ( ) 
 {
     // show hide classes
-    var container = document.getElementById('attachment_info');
-    if( YAHOO.util.Dom.hasClass(container, 'read') ){
-        YAHOO.util.Dom.replaceClass(container, 'read', 'edit');
+    var container = Y.one('#attachment_info');
+    if( container.hasClass('read') ){
+        container.replaceClass('read', 'edit');
     }else{
-        YAHOO.util.Dom.replaceClass(container, 'edit', 'read');
+        container.replaceClass('edit', 'read');
     }
 }
 
