@@ -63,8 +63,7 @@
   #%]
 [% SET starting_js_urls = [
     "js/yui3/yui/yui-min.js",
-    "js/yui/yahoo-dom-event/yahoo-dom-event.js",
-    "js/yui/cookie/cookie-min.js",
+    "js/yui/yahoo-dom-event/yahoo-dom-event.js"
 ] %]
 
 
@@ -128,7 +127,7 @@
       [% starting_js_urls.push("js/yui/$yui_name/${yui_name}-min.js") %]
     [% END %]
     [%# YUI3 Scripts %]
-    [% FOREACH yui_name = yui3 %]
+    [% FOREACH yui_name = yui3 %] 
       [% starting_js_urls.push("js/yui3/$yui_name/${yui_name}-min.js") %]
     [% END %]
     [% starting_js_urls.push('js/global.js') %]
