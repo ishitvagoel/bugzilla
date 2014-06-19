@@ -8,6 +8,9 @@
 
 [% PROCESS global/header.html.tmpl
   title = "Change Columns"
+  yui3 = [ 'yui-base', 'oop','attribute-core', 'classnamemanager','event-custom-base','event-base', 'features', 'dom-core', 'dom-base', 'selector-native', 'selector', 'node-core', 'dom-style', 'node-base', 'escape', 'button-core', 'cssbutton', 'event-custom-complex', 'attribute-observable', 'attribute-extras', 'attribute-base', 'attribute-complex', 'base-core', 'base-observable', 'base-base', 'pluginhost-base', 'pluginhost-config', 'base-pluginhost', 'event-synthetic', 'event-focus', 'node-style', 'skin-sam-widget-base', 'widget-base', 'widget-htmlparser', 'widget-skin', 'event-delegate', 'node-event-delegate', 'widget-uievents',
+    'button', 'array-extras', 'base-build', 'event-valuechange' , 'autocomplete-base', 'array-invoke', 'arraylist', 'json-parse', 'model', 'model-list', 'datatable-core', 'view',
+    'datatable-head', 'datatable-body', 'datatable-table', 'skin-sam-datatable-base', 'datatable-base', 'intl-base', 'intl', 'lang/calendar-base', 'datatype-date-parse', 'lang/datatype-date-format', 'datatype-date-format', 'datatype-date-math', 'cssgrids', 'skin-sam-calendar-base', 'calendar-base', 'plugin', 'node-pluginhost', 'dom-screen', 'node-screen', 'skin-sam-calendarnavigator', 'calendarnavigator', 'skin-sam-calendar', 'calendar', 'cookie' ]
   javascript_urls = "js/change-columns.js"
   onload = "initChangeColumns()"
 %]
@@ -16,7 +19,7 @@
   Select the columns you wish to appear in your [% terms.bug %] lists. Note that
   this feature requires cookies to work.
 </p>
-
+<h1>Test</h1>
 [% field_descs.short_short_desc     = "Summary (first 60 characters)" %]
 [% field_descs.short_desc           = "Summary (Full)" %]
 [% field_descs.assigned_to_realname = "$field_descs.assigned_to Real Name" %]

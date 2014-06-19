@@ -19,8 +19,12 @@ var queryform = "reportform"
   title = "Generate Tabular Report"
   onload = "doOnSelectProduct(0)"
   yui = [ 'autocomplete', 'calendar' ]
+  yui3 = [ 'yui-base', 'oop','attribute-core', 'classnamemanager','event-custom-base','event-base', 'features', 'dom-core', 'dom-base', 'selector-native', 'selector', 'node-core', 'dom-style', 'node-base', 'escape', 'button-core', 'cssbutton', 'event-custom-complex', 'attribute-observable', 'attribute-extras', 'attribute-base', 'attribute-complex', 'base-core', 'base-observable', 'base-base', 'pluginhost-base', 'pluginhost-config', 'base-pluginhost', 'event-synthetic', 'event-focus', 'node-style', 'skin-sam-widget-base', 'widget-base', 'widget-htmlparser', 'widget-skin', 'event-delegate', 'node-event-delegate', 'widget-uievents',
+    'button', 'array-extras', 'base-build', 'event-valuechange' , 'autocomplete-base', 'array-invoke', 'arraylist', 'json-parse', 'model', 'model-list', 'datatable-core', 'view',
+    'datatable-head', 'datatable-body', 'datatable-table', 'skin-sam-datatable-base', 'datatable-base', 'intl-base', 'intl', 'lang/calendar-base', 'datatype-date-parse', 'lang/datatype-date-format', 'datatype-date-format', 'datatype-date-math', 'cssgrids', 'skin-sam-calendar-base',
+    'calendar-base', 'plugin', 'node-pluginhost', 'dom-screen', 'node-screen', 'skin-sam-calendarnavigator', 'calendarnavigator', 'skin-sam-calendar', 'calendar', 'cookie' ]
   javascript = js_data
-  javascript_urls = [ "js/util.js", "js/TUI.js", "js/field.js" ]
+  javascript_urls = [ "js/yui3/yui/yui-min.js", "js/util.js", "js/TUI.js", "js/field.js" ]
   style_urls = ['skins/standard/buglist.css']
   doc_section = "using.html#reports"
 %]

@@ -7,37 +7,36 @@
  */
 
 function show_mini_login_form( suffix ) {
-    var login_link = document.getElementById('login_link' + suffix);
-    var login_form = document.getElementById('mini_login' + suffix);
-    var account_container = document.getElementById('new_account_container'
+    var login_link = Y.one('#login_link' + suffix);
+    var login_form = Y.one('#mini_login' + suffix);
+    var account_container = Y.one('#new_account_container'
                                                     + suffix);
 
-    YAHOO.util.Dom.addClass(login_link, 'bz_default_hidden');
-    YAHOO.util.Dom.removeClass(login_form, 'bz_default_hidden');
-    YAHOO.util.Dom.addClass(account_container, 'bz_default_hidden');
+    login_link.addClass('bz_default_hidden');
+    login_form.removeClass('bz_default_hidden');
+    account_container.addClass('bz_default_hidden');
     return false;
 }
 
 function hide_mini_login_form( suffix ) {
-    var login_link = document.getElementById('login_link' + suffix);
-    var login_form = document.getElementById('mini_login' + suffix);
-    var account_container = document.getElementById('new_account_container'
-                                                    + suffix);
+    var login_link = Y.one('#login_link' + suffix);
+    var login_form = Y.one('#mini_login' + suffix);
+    var account_container = Y.one('#new_account_container' + suffix);
 
-    YAHOO.util.Dom.removeClass(login_link, 'bz_default_hidden');
-    YAHOO.util.Dom.addClass(login_form, 'bz_default_hidden');
-    YAHOO.util.Dom.removeClass(account_container, 'bz_default_hidden');
+    login_link.removeClass('bz_default_hidden');
+    login_form.addClass('bz_default_hidden');
+    account_container.removeClass('bz_default_hidden');
     return false;
 }
 
 function show_forgot_form( suffix ) {
-    var forgot_link = document.getElementById('forgot_link' + suffix);
-    var forgot_form = document.getElementById('forgot_form' + suffix);
-    var login_container = document.getElementById('mini_login_container' 
-                                                  + suffix);
-    YAHOO.util.Dom.addClass(forgot_link, 'bz_default_hidden');
-    YAHOO.util.Dom.removeClass(forgot_form, 'bz_default_hidden');
-    YAHOO.util.Dom.addClass(login_container, 'bz_default_hidden');
+    var forgot_link = Y.one('#forgot_link' + suffix);
+    var forgot_form = Y.one('#forgot_form' + suffix);
+    var login_container = Y.one('#mini_login_container' + suffix);
+    
+    forgot_link.addClass('bz_default_hidden');
+    forgot_form.removeClass('bz_default_hidden');
+    login_container.addClass('bz_default_hidden');
     return false;
 }
 

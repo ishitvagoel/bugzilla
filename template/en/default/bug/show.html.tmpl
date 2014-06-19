@@ -11,9 +11,7 @@
 
 [% IF !header_done %]
   [% PROCESS "bug/show-header.html.tmpl" %]
-  [% PROCESS global/header.html.tmpl 
-    javascript_urls = ["js/yui_modules.js"]
-  %]
+  [% PROCESS global/header.html.tmpl %]
 
 [% END %]
 

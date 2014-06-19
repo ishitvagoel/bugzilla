@@ -1,0 +1,87 @@
+2014-04-29 21:09:56: (log.c.166) server started 
+2014-04-29 21:10:23: (server.c.1396) [note] graceful shutdown started 
+2014-04-29 21:10:23: (server.c.1512) server stopped by UID = 1000 PID = 5133 
+2014-04-29 22:02:11: (log.c.166) server started 
+2014-04-29 22:17:47: (server.c.1396) [note] graceful shutdown started 
+2014-04-29 22:17:47: (server.c.1512) server stopped by UID = 1000 PID = 19158 
+2014-05-02 14:05:53: (log.c.166) server started 
+2014-05-02 22:46:35: (server.c.1196) logfiles cycled UID = 1000 PID = 8628 
+2014-05-02 22:46:36: (server.c.1196) logfiles cycled UID = 0 PID = 0 
+2014-05-02 22:46:55: (server.c.1512) server stopped by UID = 0 PID = 17986 
+2014-05-05 11:12:21: (log.c.166) server started 
+2014-05-05 14:30:39: (server.c.1396) [note] graceful shutdown started 
+2014-05-05 14:30:39: (server.c.1512) server stopped by UID = 1000 PID = 4523 
+2014-05-13 20:13:39: (log.c.166) server started 
+2014-05-13 22:10:25: (server.c.1396) [note] graceful shutdown started 
+2014-05-13 22:10:25: (server.c.1512) server stopped by UID = 1000 PID = 3699 
+2014-05-16 09:02:31: (log.c.166) server started 
+2014-05-17 02:42:19: (server.c.1396) [note] graceful shutdown started 
+2014-05-17 02:42:19: (server.c.1512) server stopped by UID = 1000 PID = 3743 
+2014-05-17 12:23:46: (log.c.166) server started 
+2014-05-17 14:13:52: (server.c.1396) [note] graceful shutdown started 
+2014-05-17 14:13:52: (server.c.1512) server stopped by UID = 1000 PID = 6287 
+2014-05-17 16:33:25: (log.c.166) server started 
+2014-05-17 20:38:59: (server.c.1196) logfiles cycled UID = 1000 PID = 3864 
+2014-05-17 20:39:00: (server.c.1196) logfiles cycled UID = 0 PID = 0 
+2014-05-17 20:46:18: (log.c.166) server started 
+2014-05-18 01:43:36: (server.c.1196) logfiles cycled UID = 1000 PID = 3326 
+2014-05-18 01:43:37: (server.c.1196) logfiles cycled UID = 1000 PID = 3326 
+2014-05-18 10:24:54: (log.c.166) server started 
+2014-05-18 21:13:04: (server.c.1196) logfiles cycled UID = 1000 PID = 3866 
+2014-05-18 21:13:04: (server.c.1196) logfiles cycled UID = 0 PID = 0 
+2014-05-18 21:13:12: (server.c.1512) server stopped by UID = 0 PID = 10362 
+2014-05-19 20:15:33: (log.c.166) server started 
+2014-05-20 00:30:31: (server.c.1396) [note] graceful shutdown started 
+2014-05-20 00:30:31: (server.c.1512) server stopped by UID = 0 PID = 0 
+2014-06-02 08:04:23: (log.c.166) server started 
+2014-06-02 10:22:32: (server.c.1396) [note] graceful shutdown started 
+2014-06-02 10:22:32: (server.c.1512) server stopped by UID = 1000 PID = 3400 
+2014-06-06 09:34:48: (log.c.166) server started 
+2014-06-06 17:24:31: (server.c.1396) [note] graceful shutdown started 
+2014-06-06 17:24:31: (server.c.1512) server stopped by UID = 1000 PID = 4196 
+2014-06-08 08:36:32: (log.c.166) server started 
+2014-06-08 12:34:25: (server.c.1196) logfiles cycled UID = 1000 PID = 4839 
+2014-06-08 12:34:26: (server.c.1196) logfiles cycled UID = 0 PID = 0 
+2014-06-08 12:59:10: (log.c.166) server started 
+2014-06-08 22:06:54: (server.c.1396) [note] graceful shutdown started 
+2014-06-08 22:06:54: (server.c.1512) server stopped by UID = 0 PID = 0 
+2014-06-09 12:17:56: (log.c.166) server started 
+2014-06-09 23:37:51: (server.c.1396) [note] graceful shutdown started 
+2014-06-09 23:37:51: (server.c.1512) server stopped by UID = 1000 PID = 3727 
+2014-06-10 08:25:03: (log.c.166) server started 
+2014-06-10 12:52:51: (server.c.1196) logfiles cycled UID = 1000 PID = 3767 
+2014-06-10 12:52:51: (server.c.1196) logfiles cycled UID = 0 PID = 0 
+2014-06-10 13:25:07: (log.c.166) server started 
+2014-06-10 15:27:20: (server.c.1196) logfiles cycled UID = 0 PID = 0 
+2014-06-10 21:58:58: (log.c.166) server started 
+2014-06-10 23:55:11: (server.c.1196) logfiles cycled UID = 1000 PID = 4519 
+2014-06-10 23:55:32: (server.c.1512) server stopped by UID = 0 PID = 5401 
+2014-06-11 12:42:41: (log.c.166) server started 
+2014-06-11 23:54:12: (server.c.1196) logfiles cycled UID = 0 PID = 0 
+2014-06-11 23:54:12: (server.c.1196) logfiles cycled UID = 1000 PID = 5586 
+2014-06-11 23:54:47: (server.c.1512) server stopped by UID = 0 PID = 13230 
+2014-06-12 15:59:57: (log.c.166) server started 
+2014-06-12 19:08:54: (server.c.1396) [note] graceful shutdown started 
+2014-06-12 19:08:54: (server.c.1512) server stopped by UID = 1000 PID = 3433 
+2014-06-12 20:33:29: (log.c.166) server started 
+2014-06-13 00:50:32: (server.c.1396) [note] graceful shutdown started 
+2014-06-13 00:50:32: (server.c.1512) server stopped by UID = 1000 PID = 3342 
+2014-06-13 17:41:58: (log.c.166) server started 
+2014-06-13 23:25:42: (server.c.1196) logfiles cycled UID = 1000 PID = 5468 
+2014-06-13 23:26:07: (server.c.1512) server stopped by UID = 0 PID = 7290 
+2014-06-14 09:19:42: (log.c.166) server started 
+2014-06-14 17:00:58: (server.c.1196) logfiles cycled UID = 0 PID = 0 
+2014-06-14 17:01:14: (server.c.1512) server stopped by UID = 0 PID = 10291 
+2014-06-15 10:08:37: (log.c.166) server started 
+2014-06-16 00:34:44: (server.c.1396) [note] graceful shutdown started 
+2014-06-16 00:34:44: (server.c.1512) server stopped by UID = 1000 PID = 4307 
+2014-06-16 13:14:52: (log.c.166) server started 
+2014-06-17 01:39:27: (server.c.1396) [note] graceful shutdown started 
+2014-06-17 01:39:27: (server.c.1512) server stopped by UID = 1000 PID = 5229 
+2014-06-17 11:30:35: (log.c.166) server started 
+2014-06-18 00:00:50: (server.c.1196) logfiles cycled UID = 0 PID = 0 
+2014-06-18 00:01:01: (server.c.1512) server stopped by UID = 0 PID = 10383 
+2014-06-19 12:05:02: (log.c.166) server started 
+2014-06-19 13:37:23: (server.c.1196) logfiles cycled UID = 1000 PID = 2848 
+2014-06-19 13:37:23: (server.c.1196) logfiles cycled UID = 0 PID = 0 
+2014-06-19 13:37:30: (server.c.1512) server stopped by UID = 0 PID = 5037 

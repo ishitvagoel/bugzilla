@@ -35,12 +35,12 @@ function toggle_all_comments(action) {
     // there are no more comments, but that the comment is private and
     // the user is not allowed to view it.
 
-    var comments = YAHOO.util.Dom.getElementsByClassName('bz_comment_text');
-    for (var i = 0; i < comments.length; i++) {
-        var comment = comments[i];
+    var comments = Y.all('.bz_comment_text');
+    for (var i = 0; i < comments.size(); i++) {
+        var comment = comments.item(i);
         if (!comment)
             continue;
-        var id = comment.id.match(/^comment_text_(\d*)$/);
+        var id = comment.get('id').match(/^comment_text_(\d*)$/);
         if (!id)
             continue;
         id = id[1];
@@ -54,15 +54,15 @@ function toggle_all_comments(action) {
 }
 
 function collapse_comment(link, comment, comment_id) {
-    link.innerHTML = "[+]";
-    YAHOO.util.Dom.addClass(comment, 'collapsed');
-    YAHOO.util.Dom.addClass('comment_tag_' + comment_id, 'collapsed');
+    link.set('innerHTML', "[+]");
+    comment.addClass('collapsed');
+    Y.one('#comment_tag_' + comment_id).addClass('collapsed');
 }
 
 function expand_comment(link, comment, comment_id) {
-    link.innerHTML = "[&minus;]";
-    YAHOO.util.Dom.removeClass(comment, 'collapsed');
-    YAHOO.util.Dom.removeClass('comment_tag_' + comment_id, 'collapsed');
+    link.set('innerHTML', "[&minus;]");
+    comment.removeClass('collapsed');
+    Y.one('#comment_tag_' + comment_id).removeClass('collapsed');
 }
 
 function wrapReplyText(text) {
