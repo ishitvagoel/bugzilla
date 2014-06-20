@@ -22,9 +22,9 @@ function updateCommentPrivacy(checkbox, id) {
 /* The functions below expand and collapse comments  */
 
 function toggle_comment_display(link, comment_id) {
-    var comment = document.getElementById('comment_text_' + comment_id);
+    var comment = Y.one('#comment_text_' + comment_id);
     var re = new RegExp(/\bcollapsed\b/);
-    if (comment.className.match(re))
+    if (comment.get('className').match(re))
         expand_comment(link, comment, comment_id);
     else
         collapse_comment(link, comment, comment_id);
@@ -44,7 +44,7 @@ function toggle_all_comments(action) {
         if (!id)
             continue;
         id = id[1];
-        var link = document.getElementById('comment_link_' + id);
+        var link = Y.one('#comment_link_' + id);
         if (action == 'collapse') {
             collapse_comment(link, comment, id);
         } else {
@@ -118,7 +118,7 @@ function wrapReplyText(text) {
 function addCollapseLink(count, collapsed, title) {
     document.write(' <a href="#" class="bz_collapse_comment"' +
                    ' id="comment_link_' + count +
-                   '" onclick="toggle_comment_display(this, ' +  count +
+                   '" onclick="toggle_comment_display(Y.Node(this), ' +  count +
                    '); return false;" title="' + title + '">[' +
                    (collapsed ? '+' : '&minus;') + ']<\/a> ');
 }
