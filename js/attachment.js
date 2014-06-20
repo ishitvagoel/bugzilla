@@ -1,10 +1,10 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, You can obtain one at http://mozilla.org/MPL/2.0/.
-*
-* This Source Code Form is "Incompatible With Secondary Licenses", as
-* defined by the Mozilla Public License, v. 2.0.
-*/
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0.
+ */
 
 function validateAttachmentForm(theform) {
     var desc_value = Y.Lang.trim(theform.description.value);
@@ -90,8 +90,8 @@ function clearAttachmentFields() {
     }
     document.getElementById('description').value = '';
     /* Fire onchange so that the disabled state of the content-type
-* radio buttons are also reset
-*/
+     * radio buttons are also reset
+     */
     element = document.getElementById('ispatch');
     element.checked = '';
     bz_fireEvent(element, 'change');
