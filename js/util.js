@@ -275,8 +275,8 @@ function bz_preselectedOptions(aSelect) {
  * @param aValue        The value you want to know the index of.
  */
 function bz_optionIndex(aSelect, aValue) {
-    for (var i = 0; i < aSelect.options.length; i++) {
-        if (aSelect.options[i].value == aValue) {
+    for (var i = 0; i < aSelect.get('options').size(); i++) {
+        if (aSelect.get('options').item(i).get('value') == aValue) {
             return i;
         }
     }
@@ -313,10 +313,10 @@ function bz_fireEvent(anElement, anEvent) {
  * @param aClass     The name of the CSS class to toggle.
  */
 function bz_toggleClass(anElement, aClass) {
-    if (YAHOO.util.Dom.hasClass(anElement, aClass)) {
-        YAHOO.util.Dom.removeClass(anElement, aClass);
+    if (anElement.hasClass(aClass)) {
+        anElement.removeClass(aClass);
     }
     else {
-        YAHOO.util.Dom.addClass(anElement, aClass);
+        anElement.addClass(aClass);
     }
 }
