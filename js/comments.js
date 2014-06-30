@@ -23,11 +23,11 @@ function updateCommentPrivacy(checkbox, id) {
 
 function toggle_comment_display(link, comment_id) {
     var comment = Y.one('#comment_text_' + comment_id);
-    var re = new RegExp(/\bcollapsed\b/);
-    if (comment.get('className').match(re))
+    if (comment.hasClass('collapsed')) {
         expand_comment(link, comment, comment_id);
-    else
+    } else {
         collapse_comment(link, comment, comment_id);
+    }
 }
 
 function toggle_all_comments(action) {
@@ -61,6 +61,8 @@ function collapse_comment(link, comment, comment_id) {
 
 function expand_comment(link, comment, comment_id) {
     link.set('innerHTML', "[&minus;]");
+    Y.one('#cr' + comment_id).addClass('collapsed');
+    Y.one('#c' + comment_id).removeClass('bz_default_collapsed');
     comment.removeClass('collapsed');
     Y.one('#comment_tag_' + comment_id).removeClass('collapsed');
 }

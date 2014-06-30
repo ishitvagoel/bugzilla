@@ -201,6 +201,12 @@ use constant DEFAULT_FIELDS => (
      buglist => 1},
     {name => 'qa_contact',   desc => 'QAContact',  in_new_bugmail => 1,
      buglist => 1},
+    {name => 'assigned_to_realname',  desc => 'AssignedToName',
+     in_new_bugmail => 0, buglist => 1},
+    {name => 'reporter_realname',     desc => 'ReportedByName',
+     in_new_bugmail => 0, buglist => 1},
+    {name => 'qa_contact_realname',   desc => 'QAContactName',
+     in_new_bugmail => 0, buglist => 1},
     {name => 'cc',           desc => 'CC',         in_new_bugmail => 1},
     {name => 'dependson',    desc => 'Depends on', in_new_bugmail => 1,
      is_numeric => 1, buglist => 1},
@@ -1058,6 +1064,7 @@ sub create {
     $field->_update_visibility_values();
 
     $dbh->bz_commit_transaction();
+    Bugzilla->memcached->clear_config();
 
     if ($field->custom) {
         my $name = $field->name;
@@ -1096,6 +1103,7 @@ sub update {
         $dbh->do("UPDATE " . $self->name . " SET visibility_value_id = NULL");
     }
     $self->_update_visibility_values();
+    Bugzilla->memcached->clear_config();
     return $changes;
 }
 

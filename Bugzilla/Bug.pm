@@ -256,7 +256,6 @@ use constant MAX_LINE_LENGTH => 254;
 # use.)
 use constant FIELD_MAP => {
     blocks           => 'blocked',
-    cc_accessible    => 'cclist_accessible',
     commentprivacy   => 'comment_is_private',
     creation_time    => 'creation_ts',
     creator          => 'reporter',
@@ -1046,6 +1045,11 @@ sub update {
         $dbh->do('UPDATE bugs SET delta_ts = ? WHERE bug_id = ?',
                  undef, ($delta_ts, $self->id));
         $self->{delta_ts} = $delta_ts;
+    }
+
+    # Update last-visited
+    if ($user->is_involved_in_bug($self)) {
+        $self->update_user_last_visit($user, $delta_ts);
     }
 
     # Update bug ignore data if user wants to ignore mail for this bug
@@ -4049,11 +4053,12 @@ sub get_activity {
 
 # Update the bugs_activity table to reflect changes made in bugs.
 sub LogActivityEntry {
-    my ($i, $col, $removed, $added, $whoid, $timestamp, $comment_id) = @_;
+    my ($bug_id, $field, $removed, $added, $user_id, $timestamp, $comment_id,
+        $attach_id) = @_;
     my $sth = Bugzilla->dbh->prepare_cached(
-      'INSERT INTO bugs_activity
-       (bug_id, who, bug_when, fieldid, removed, added, comment_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?)');
+        'INSERT INTO bugs_activity
+        (bug_id, who, bug_when, fieldid, removed, added, comment_id, attach_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
 
     # in the case of CCs, deps, and keywords, there's a possibility that someone
     # might try to add or remove a lot of them at once, which might take more
@@ -4077,8 +4082,9 @@ sub LogActivityEntry {
         }
         trick_taint($addstr);
         trick_taint($removestr);
-        my $fieldid = get_field_id($col);
-        $sth->execute($i, $whoid, $timestamp, $fieldid, $removestr, $addstr, $comment_id);
+        my $fieldid = get_field_id($field);
+        $sth->execute($bug_id, $user_id, $timestamp, $fieldid, $removestr,
+            $addstr, $comment_id, $attach_id);
     }
 }
 

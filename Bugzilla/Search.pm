@@ -235,6 +235,9 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     assigned_to => {
         _non_changed => \&_user_nonchanged,
     },
+    assigned_to_realname => {
+        _non_changed => \&_user_nonchanged,
+    },
     cc => {
         _non_changed => \&_user_nonchanged,
     },
@@ -242,6 +245,9 @@ use constant OPERATOR_FIELD_OVERRIDE => {
         _non_changed => \&_user_nonchanged,
     },
     reporter => {
+        _non_changed => \&_user_nonchanged,
+    },
+    reporter_realname => {
         _non_changed => \&_user_nonchanged,
     },
     'requestees.login_name' => {
@@ -253,7 +259,10 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     qa_contact => {
         _non_changed => \&_user_nonchanged,
     },
-    
+    qa_contact_realname => {
+        _non_changed => \&_user_nonchanged,
+    },
+
     # General Bug Fields
     alias        => { _non_changed => \&_nullable },
     'attach_data.thedata' => MULTI_SELECT_OVERRIDE,
@@ -407,6 +416,7 @@ use constant FIELD_MAP => {
     bugidtype => 'bug_id_type',
     changedin => 'days_elapsed',
     long_desc => 'longdesc',
+    tags      => 'tag',
 };
 
 # Some fields are not sorted on themselves, but on other fields.
@@ -569,9 +579,6 @@ sub COLUMNS {
     # of short_short_desc.)
     my %columns = (
         relevance            => { title => 'Relevance'  },
-        assigned_to_realname => { title => 'Assignee'   },
-        reporter_realname    => { title => 'Reporter'   },
-        qa_contact_realname  => { title => 'QA Contact' },
     );
 
     # Next we define columns that have special SQL instead of just something
@@ -628,7 +635,7 @@ sub COLUMNS {
              $sql = $dbh->sql_string_until($sql, $dbh->quote('@'));
         }
         $special_sql{$col} = $sql;
-        $columns{"${col}_realname"}->{name} = "map_${col}.realname";
+        $special_sql{"${col}_realname"} = "map_${col}.realname";
     }
 
     foreach my $col (@id_fields) {
@@ -2053,6 +2060,13 @@ sub _quote_unless_numeric {
 
 sub build_subselect {
     my ($outer, $inner, $table, $cond, $negate) = @_;
+    if ($table =~ /\battach_data\b/) {
+        # It takes a long time to scan the whole attach_data table
+        # unconditionally, so we return the subselect and let the DB optimizer
+        # restrict the search based on other search criteria.
+        my $not = $negate ? "NOT" : "";
+        return "$outer $not IN (SELECT DISTINCT $inner FROM $table WHERE $cond)";
+    }
     # Execute subselects immediately to avoid dependent subqueries, which are
     # large performance hits on MySql
     my $q = "SELECT DISTINCT $inner FROM $table WHERE $cond";
@@ -2391,6 +2405,20 @@ sub _user_nonchanged {
     if ($args->{value_is_id}) {
         $null_alternate = 0;
     }
+    elsif (substr($field, -9) eq '_realname') {
+        my $as = "name_${field}_$chart_id";
+        # For fields with periods in their name.
+        $as =~ s/\./_/;
+        my $join = {
+            table => 'profiles',
+            as    => $as,
+            from  => substr($args->{full_field}, 0, -9),
+            to    => 'userid',
+            join  => (!$is_in_other_table and !$is_nullable) ? 'INNER' : undef,
+        };
+        push(@$joins, $join);
+        $args->{full_field} = "$as.realname";
+    }
     else {
         my $as = "name_${field}_$chart_id";
         # For fields with periods in their name.
@@ -2405,7 +2433,7 @@ sub _user_nonchanged {
         push(@$joins, $join);
         $args->{full_field} = "$as.login_name";
     }
-    
+
     # We COALESCE fields that can be NULL, to make "not"-style operators
     # continue to work properly. For example, "qa_contact is not equal to bob"
     # should also show bugs where the qa_contact is NULL. With COALESCE,
