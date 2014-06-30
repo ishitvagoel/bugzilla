@@ -61,7 +61,10 @@ function collapse_comment(link, comment, comment_id) {
 
 function expand_comment(link, comment, comment_id) {
     link.set('innerHTML', "[&minus;]");
-    Y.one('#cr' + comment_id).addClass('collapsed');
+    var cr_node = Y.one('#cr' + comment_id);
+    if (cr_node) {
+        cr_node.addClass('collapsed');
+    }
     Y.one('#c' + comment_id).removeClass('bz_default_collapsed');
     comment.removeClass('collapsed');
     Y.one('#comment_tag_' + comment_id).removeClass('collapsed');
