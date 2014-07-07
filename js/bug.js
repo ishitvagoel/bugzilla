@@ -9,13 +9,13 @@
 /* This library assumes that the needed YUI libraries have been loaded 
    already. */
 
-YUI.bugzilla.dupTable = {
+YAHOO.bugzilla.dupTable = {
     counter: 0,
     dataSource: null,
     updateTable: function(dataTable, product_name, summary_field) {
-        if (summary_field.get('value').size() < 4) return;
+        if (summary_field.value.length < 4) return;
 
-        YUI.bugzilla.dupTable.counter = YUI.bugzilla.dupTable.counter + 1;
+        YAHOO.bugzilla.dupTable.counter = YAHOO.bugzilla.dupTable.counter + 1;
         YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
         var json_object = {
             version : "1.1",
@@ -29,13 +29,13 @@ YUI.bugzilla.dupTable = {
                                    "update_token" ]
             }
         };
-        var post_data = Y.JSON.stringify(json_object);
+        var post_data = YAHOO.lang.JSON.stringify(json_object);
 
         var callback = {
             success: dataTable.onDataReturnInitializeTable,
             failure: dataTable.onDataReturnInitializeTable,
             scope:   dataTable,
-            argument: dataTable.getState()
+            argument: dataTable.getState() 
         };
         dataTable.showTableMessage(dataTable.get("MSG_LOADING"),
                                    YAHOO.widget.DataTable.CLASS_LOADING);
@@ -53,10 +53,10 @@ YUI.bugzilla.dupTable = {
     doUpdateTable: function(e, args) {
         var dt = args[0];
         var product_name = args[1];
-        var summary = e.target;
-        clearTimeout(YUI.bugzilla.dupTable.lastTimeout);
-        YUI.bugzilla.dupTable.lastTimeout = setTimeout(function() {
-            YUI.bugzilla.dupTable.updateTable(dt, product_name, summary) },
+        var summary = YAHOO.util.Event.getTarget(e);
+        clearTimeout(YAHOO.bugzilla.dupTable.lastTimeout);
+        YAHOO.bugzilla.dupTable.lastTimeout = setTimeout(function() {
+            YAHOO.bugzilla.dupTable.updateTable(dt, product_name, summary) },
             600);
     },
     formatBugLink: function(el, oRecord, oColumn, oData) {
@@ -83,53 +83,9 @@ YUI.bugzilla.dupTable = {
         el.appendChild(button);
         new YAHOO.widget.Button(button);
     },
-    init_ds: function() { // Do we even require this property ? Can't we just shift this logic inside init only ?
-        var new_ds = new Y.DataSource.IO({ source: "jsonrpc.cgi" });
-        
-        var callback = {
-            success: function(e){ //What logic is needed here ?
-                Y.log(e.response);
-            },
-            failure: function(e){//What logic is needed here ?
-                Y.log(e.response);
-            }
-        }
-
-        new_ds.plug(Y.Plugin.DataSourceJSONSchema, {
-            schema: {
-                resultListLocator: "bug.result",
-                resultFields: [ "id", "summary", "status", "resolution",
-                                     "update_token" ]
-            }
-        });
-        
-        var json_object = {
-            version : "1.1",
-            method : "Bug.possible_duplicates",
-            id : YAHOO.bugzilla.dupTable.counter    ,
-            params : {
-                product : product_name,
-                summary : summary_field.value,
-                limit : 7,
-                include_fields : [ "id", "summary", "status", "resolution",
-                                   "update_token" ]
-            }
-        };
-        var post_data = Y.JSON.stringify(json_object);
-
-        new_ds.sendRequest({
-          request:post_data ,
-          cfg: {
-                  method: "POST",
-                  headers: { 'Content-Type': 'application/json' }
-              },
-          callback: callback
-        });
-
-        //Are we missing out on some functionality achieved by setting these properties ? 
-        //Checked the docs for YUI3 but didn't get info about these properties.Caching still can be done.
-        
-        /*new_ds.connTimeout = 30000;
+    init_ds: function() {
+        var new_ds = new YAHOO.util.XHRDataSource("jsonrpc.cgi");
+        new_ds.connTimeout = 30000;
         new_ds.connMethodPost = true;
         new_ds.connXhrMode = "cancelStaleRequests";
         new_ds.maxCacheEntries = 3;
@@ -137,14 +93,10 @@ YUI.bugzilla.dupTable = {
             resultsList : "result.bugs",
             metaFields : { error: "error", jsonRpcId: "id" }
         };
-        */
-        
-        //What do we need to do with dobeforeParseData function ? Should it be implemented as a failure function inside the callback ?
-        /*
         // DataSource can't understand a JSON-RPC error response, so
         // we have to modify the result data if we get one.
         new_ds.doBeforeParseData = 
-            function(oRequest, oFullResponse, oCallback) { // Response consists of http://yui.github.io/yui2/docs/yui_2.9.0_full/datasource/index.html#ds_oParsedResponse
+            function(oRequest, oFullResponse, oCallback) {
                 if (oFullResponse.error) {
                     oFullResponse.result = {};
                     oFullResponse.result.bugs = [];
@@ -154,24 +106,16 @@ YUI.bugzilla.dupTable = {
                 }
                 return oFullResponse;
         }
-        */
+
         this.dataSource = new_ds;
     },
     init: function(data) {
         if (this.dataSource == null) this.init_ds();
-        data.options.initialLoad = false; // What is the use of this ?
-        var dt = new Y.DataTable({
-            columns: data.columns,
-            data: this.dataSource,  
-            strings: data.options // as per https://github.com/mozilla/webtools-bmo-bugzilla/blob/master/extensions/MyDashboard/web/js/flags.js#L145
-        });
-        dt.render('#' + data.container);
-        
-        /*
+        data.options.initialLoad = false;
         var dt = new YAHOO.widget.DataTable(data.container, data.columns, 
             this.dataSource, data.options); 
-        */
-        Y.one('#' + data.summary_field).on('keyup', this.doUpdateTable, null, [dt, data.product_name]); // as per http://stackoverflow.com/questions/2398877/how-to-pass-arguments-to-yui3s-on-method-callbacks
+        YAHOO.util.Event.on(data.summary_field, 'keyup', this.doUpdateTable,
+                            [dt, data.product_name]);
     }
 };
 
@@ -217,7 +161,7 @@ function set_assign_to(use_qa_contact) {
         }
 
         // We show or hide the available flags depending on the selected component.
-        var flag_rows = YAHOO.util.Dom.getElementsByClassName('.bz_flag_type', 'tbody');
+        var flag_rows = YAHOO.util.Dom.getElementsByClassName('bz_flag_type', 'tbody');
         for (var i = 0; i < flag_rows.length; i++) {
             // Each flag table row should have one flag form select element
             // We get the flag type id from the id attribute of the select.
