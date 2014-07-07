@@ -103,8 +103,7 @@ TUI_hide_default('attachment_text_field');
         Advanced Fields</a>
       [%# Show the link if the browser supports JS %]
       <script type="text/javascript">
-        YAHOO.util.Dom.removeClass('expert_fields_controller', 
-                                   'bz_default_hidden');
+        Y.one('#expert_fields_controller').removeClass('bz_default_hidden');
       </script>
     </td>
     <td colspan="2">
