@@ -93,9 +93,10 @@ YUI.bugzilla.dupTable = {
 
         new_ds.plug(Y.Plugin.DataSourceJSONSchema, {
             schema: {
-                resultListLocator: "bug.result",
+                resultListLocator: "result.bugs",
                 resultFields: [ "id", "summary", "status", "resolution",
-                                     "update_token" ]
+                                     "update_token" ],
+                metaFields : { error: "error", jsonRpcId: "id" }                     
             }
         });
         this.dataSource = new_ds;
