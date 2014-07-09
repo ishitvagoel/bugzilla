@@ -9,12 +9,11 @@
 /* This library assumes that the needed YUI libraries have been loaded 
    already. */
 
-YUI.bugzilla.dupTable = {
+YUI.bugzilla.dupTable = { // Is this usage of YUI global object correct ?
     counter: 0,
     dataSource: null,
     updateTable: function(dataTable, product_name, summary_field) {
         if (summary_field.get('value').size() < 4) return;
-
         YUI.bugzilla.dupTable.counter = YUI.bugzilla.dupTable.counter + 1;
         var json_object = {
             version : "1.1",
@@ -29,24 +28,15 @@ YUI.bugzilla.dupTable = {
             }
         };
         var post_data = Y.JSON.stringify(json_object);
-
-        var callback = {
-            success: dataTable.onDataReturnInitializeTable, // should it be Y.Plugin.DataTableDataSource.onDataReturnInitializeTable ?
-            failure: dataTable.onDataReturnInitializeTable, // http://yuilibrary.com/yui/docs/api/classes/Plugin.DataTableDataSource.html#method_onDataReturnInitializeTable
-            scope:   dataTable, //are these properties of callback supported in YUI3 as well ?
-            argument: dataTable.getState() //are these properties of callback supported in YUI3 as well ?
-        };
-        dataTable.showMessage("MSG_LOADING"); // To ask about it , docs for YUI3 suggest only one parameter for showMessage, should we use Node.addClass method to add the class ,YAHOO.widget.DataTable.CLASS_LOADING) ?
+        dataTable.showMessage(data.options.MSG_LOADING);
         Y.one('#possible_duplicates_container').removeClass('bz_default_hidden');
-        dataTable.sendRequest({
-          request:post_data ,
-          cfg: {
-                  method: "POST",
-                  headers: { 'Content-Type': 'application/json' }
-              },
-          callback: callback
+        dataTable.datasource.load({
+            request: post_data,
+            cfg: {
+              method: "POST",
+              headers: { 'Content-Type': 'application/json' }
+            }
         });
-
     },
     // This is the keyup event handler. It calls updateTable with a relatively
     // long delay, to allow additional input. However, the delay is short
@@ -64,7 +54,7 @@ YUI.bugzilla.dupTable = {
             YUI.bugzilla.dupTable.updateTable(dt, product_name, summary) },
             600);
     },
-    formatBugLink: function(el, oRecord, oColumn, oData) {
+    formatBugLink: function(el, oRecord, oColumn, oData) {//* What are the types of the arguments in all the formatter function. Couldn't identify it using the Debugger.
         el.innerHTML = '<a href="show_bug.cgi?id=' + oData + '">' 
                        + oData + '</a>';
     },
@@ -84,13 +74,14 @@ YUI.bugzilla.dupTable = {
                   + '&addselfcc=1&token=' + escape(oData);
         var button = document.createElement('a');
         button.setAttribute('href',  url);
-        button.innerHTML = YAHOO.bugzilla.dupTable.addCcMessage;
+        button.innerHTML = YUI.bugzilla.dupTable.addCcMessage;
         el.appendChild(button);
         new YAHOO.widget.Button(button);
     },
     init_ds: function() {
-        var new_ds = new Y.DataSource.IO({ source: "jsonrpc.cgi" });
-
+        var new_ds = new Y.DataSource.IO({
+            source: "jsonrpc.cgi"
+        });
         new_ds.plug(Y.Plugin.DataSourceJSONSchema, {
             schema: {
                 resultListLocator: "result.bugs",
@@ -98,52 +89,20 @@ YUI.bugzilla.dupTable = {
                                      "update_token" ],
                 metaFields : { error: "error", jsonRpcId: "id" }                     
             }
-        });
+        }).plug(Y.Plugin.DataSourceCache, { max: 3 });
+
         this.dataSource = new_ds;
-        //Are we missing out on some functionality achieved by setting these properties ? 
-        //Checked the docs for YUI3 but didn't get info about these properties.Caching still can be done.
-        
-        /*new_ds.connTimeout = 30000;
-        new_ds.connMethodPost = true;
-        new_ds.connXhrMode = "cancelStaleRequests";
-        new_ds.maxCacheEntries = 3;
-        new_ds.responseSchema = {
-            resultsList : "result.bugs",
-            metaFields : { error: "error", jsonRpcId: "id" }
-        };
-        */
-        
-        //What do we need to do with dobeforeParseData function ? Should it be implemented as a failure function inside the callback ?
-        /*
-        // DataSource can't understand a JSON-RPC error response, so
-        // we have to modify the result data if we get one.
-        new_ds.doBeforeParseData = 
-            function(oRequest, oFullResponse, oCallback) { // Response consists of http://yui.github.io/yui2/docs/yui_2.9.0_full/datasource/index.html#ds_oParsedResponse
-                if (oFullResponse.error) {
-                    oFullResponse.result = {};
-                    oFullResponse.result.bugs = [];
-                    if (console) {
-                        console.log("JSON-RPC error:", oFullResponse.error);
-                    }
-                }
-                return oFullResponse;
-        }
-        */
     },
     init: function(data) {
         if (this.dataSource == null) this.init_ds();
-        data.options.initialLoad = false;// What is the use of this ?
         var dt = new Y.DataTable({
             columns: data.columns,
-            data: this.dataSource,  
-            strings: data.options // as per https://github.com/mozilla/webtools-bmo-bugzilla/blob/master/extensions/MyDashboard/web/js/flags.js#L145
+            strings: data.options
+        });
+        dt.plug(Y.Plugin.DataTableDataSource, {
+            datasource: this.dataSource
         });
         dt.render('#' + data.container);
-        
-        /*
-        var dt = new YAHOO.widget.DataTable(data.container, data.columns, 
-            this.dataSource, data.options); 
-        */
         Y.one('#' + data.summary_field).on('keyup', this.doUpdateTable, null, [dt, data.product_name]); // as per http://stackoverflow.com/questions/2398877/how-to-pass-arguments-to-yui3s-on-method-callbacks
     }
 };
@@ -190,17 +149,17 @@ function set_assign_to(use_qa_contact) {
         }
 
         // We show or hide the available flags depending on the selected component.
-        var flag_rows = Y.all('tbody .bz_flag_type'); //Is this selector string correct ?
+        var flag_rows = Y.all('tbody .bz_flag_type'); //*Is this selector string correct ?
         for (var i = 0; i < flag_rows.size(); i++) {
             // Each flag table row should have one flag form select element
             // We get the flag type id from the id attribute of the select.
             var flag_select = flag_rows.item(i).all('select .flag_select').item(0);
             var type_id = flag_select.get('id').split('-')[1];
-            var can_set = flag_select.get('options').size() > 1 ? 1 : 0; // or flag_select.options.size() ?
+            var can_set = flag_select.get('options').size() > 1 ? 1 : 0; //* or flag_select.options.size() ? How do we identify which properties are meant to be accessed through the get function and which can be accessed directly ?
             var show = 0;
             // Loop through the allowed flag ids for the selected component
             // and if we match, then show the row, otherwise hide the row.
-            for (var j = 0; j < flags[index].length; j++) {//Where is the flags array defined and what does it contain ?
+            for (var j = 0; j < flags[index].length; j++) {//*Where is the flags array defined and what does it contain ?
                 if (flags[index][j] == type_id) {
                     show = 1;
                     break;
@@ -219,7 +178,7 @@ function set_assign_to(use_qa_contact) {
 (function(){
     'use strict';
 
-    YAHOO.bugzilla.bugUserLastVisit = {
+    YUI.bugzilla.bugUserLastVisit = {
         update: function(bug_id) {
             var post_data = Y.JSON.stringify({
                 version: "1.1",
@@ -233,15 +192,12 @@ function set_assign_to(use_qa_contact) {
                             + res.responseText);
                 },
             };
-            //YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
             Y.io('jsonrpc.cgi',{
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 on: callbacks
                     
             });
-           /* YAHOO.util.Connect.asyncRequest('POST', 'jsonrpc.cgi', callbacks,
-                args) */
         },
 
         get: function(done) {
@@ -258,15 +214,11 @@ function set_assign_to(use_qa_contact) {
                                 + res.responseText);
                 },
             };
-           // YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
             Y.io('jsonrpc.cgi',{
                 method: 'POST',
                 headers: {'Content-Type': 'application/xml'},
                 on: callbacks
             });
-            /*YAHOO.util.Connect.asyncRequest('POST', 'jsonrpc.cgi', callbacks,
-                    args)
-            */        
         },
     };
 })();
