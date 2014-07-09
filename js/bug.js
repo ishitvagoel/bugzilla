@@ -72,11 +72,17 @@ YUI.bugzilla.dupTable = { // Is this usage of YUI global object correct ?
     formatCcButton: function(el, oRecord, oColumn, oData) {
         var url = 'process_bug.cgi?id=' + oRecord.getData('id') 
                   + '&addselfcc=1&token=' + escape(oData);
-        var button = document.createElement('a');
-        button.setAttribute('href',  url);
-        button.innerHTML = YUI.bugzilla.dupTable.addCcMessage;
-        el.appendChild(button);
-        new YAHOO.widget.Button(button);
+        var button = Y.Node.create('<button id = formatCcButton_' + oRecord.getData('id') + '></button>');
+        button.set('innerHTML', YUI.bugzilla.dupTable.addCcMessage);
+        el.appendChild(Y.getDOMNode(button);
+        new Y.Button({
+            srcNode: '#formatCcButton_' + oRecord.getData('id'),
+            on:{
+                click: function(){
+                    window.open(url, "_self");
+                }
+            }
+        }).render();
     },
     init_ds: function() {
         var new_ds = new Y.DataSource.IO({
