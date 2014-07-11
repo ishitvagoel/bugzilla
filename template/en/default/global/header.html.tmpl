@@ -124,6 +124,7 @@
 
     <script type="text/javascript">
     <!--
+        YUI.add('bugzilla').namespace('bugzilla');
         YAHOO.namespace('bugzilla');
         YAHOO.util.Event.addListener = function (el, sType, fn, obj, overrideContext) {
                if ( ("onpagehide" in window || YAHOO.env.ua.gecko) && sType === "unload") { sType = "pagehide"; };
@@ -185,7 +186,7 @@
           [% END %]
         [% END %]
 
-        var Y = YUI({bootstrap: false}).use('node'
+        var Y = YUI({sync: true, bootstrap: false}).use('node'
           [% FOREACH module = yui3 %]
             [%~ %],'[% module FILTER js %]'
           [% END ~%]

@@ -13,22 +13,22 @@ YUI.bugzilla.dupTable = { // Is this usage of YUI global object correct ?
     counter: 0,
     dataSource: null,
     updateTable: function(dataTable, product_name, summary_field) {
-        if (summary_field.get('value').size() < 4) return;
+        if (summary_field.get('value').length < 4) return;
         YUI.bugzilla.dupTable.counter = YUI.bugzilla.dupTable.counter + 1;
         var json_object = {
             version : "1.1",
             method : "Bug.possible_duplicates",
-            id : YAHOO.bugzilla.dupTable.counter,
+            id : YUI.bugzilla.dupTable.counter,
             params : {
                 product : product_name,
-                summary : summary_field.value,
+                summary : summary_field.get('value'),
                 limit : 7,
                 include_fields : [ "id", "summary", "status", "resolution",
                                    "update_token" ]
             }
         };
         var post_data = Y.JSON.stringify(json_object);
-        dataTable.showMessage(data.options.MSG_LOADING);
+        
         Y.one('#possible_duplicates_container').removeClass('bz_default_hidden');
         dataTable.datasource.load({
             request: post_data,
@@ -54,27 +54,27 @@ YUI.bugzilla.dupTable = { // Is this usage of YUI global object correct ?
             YUI.bugzilla.dupTable.updateTable(dt, product_name, summary) },
             600);
     },
-    formatBugLink: function(el, oRecord, oColumn, oData) {//* What are the types of the arguments in all the formatter function. Couldn't identify it using the Debugger.
-        el.innerHTML = '<a href="show_bug.cgi?id=' + oData + '">' 
-                       + oData + '</a>';
+    formatBugLink: function(el) {//* What are the types of the arguments in all the formatter function. Couldn't identify it using the Debugger.
+        el.value = '<a href="show_bug.cgi?id=' + el.value + '">' 
+                       + el.value + '</a>';
     },
-    formatStatus: function(el, oRecord, oColumn, oData) {
-        var resolution = oRecord.getData('resolution');
-        var bug_status = display_value('bug_status', oData);
+    formatStatus: function(el) {
+        var resolution = el.data.resolution;
+        var bug_status = display_value('bug_status', el.data.status);
         if (resolution) {
-            el.innerHTML = bug_status + ' ' 
+            el.data.resolution = bug_status + ' ' 
                            + display_value('resolution', resolution);
         }
         else {
-            el.innerHTML = bug_status;
+            el.data.resolution = bug_status;
         }
     },
-    formatCcButton: function(el, oRecord, oColumn, oData) {
-        var url = 'process_bug.cgi?id=' + oRecord.getData('id') 
-                  + '&addselfcc=1&token=' + escape(oData);
-        var button = Y.Node.create('<button id = formatCcButton_' + oRecord.getData('id') + '></button>');
-        button.set('innerHTML', YUI.bugzilla.dupTable.addCcMessage);
-        el.appendChild(Y.getDOMNode(button);
+    formatCcButton: function(el) {
+        var url = 'process_bug.cgi?id=' + el.data.id 
+                  + '&addselfcc=1&token=' + escape(el.data.update_token);
+        var button = Y.Node.create('<button id = formatCcButton_' + el.data.id + '></button>');
+        button.set('text', YUI.bugzilla.dupTable.addCcMessage);
+        //el.appendChild(Y.getDOMNode(button));
         new Y.Button({
             srcNode: '#formatCcButton_' + oRecord.getData('id'),
             on:{
@@ -160,6 +160,9 @@ function set_assign_to(use_qa_contact) {
             // Each flag table row should have one flag form select element
             // We get the flag type id from the id attribute of the select.
             var flag_select = flag_rows.item(i).all('select .flag_select').item(0);
+            if(!flag_select){
+                return;
+            } 
             var type_id = flag_select.get('id').split('-')[1];
             var can_set = flag_select.get('options').size() > 1 ? 1 : 0; //* or flag_select.options.size() ? How do we identify which properties are meant to be accessed through the get function and which can be accessed directly ?
             var show = 0;
