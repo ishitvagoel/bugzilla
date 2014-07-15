@@ -92,11 +92,12 @@
     [% PROCESS 'global/setting-descs.none.tmpl' %]
 
     [% SET yui = yui_resolve_deps(yui, yui_deps) %]
-
-    [% SET css_sets = css_files(style_urls, yui, yui_css) %]
+    
+    [% SET css_sets = css_files(style_urls, yui) %]
+    [% SET css_sets = css_files(style_urls, yui3) %]
     <link href="[% css_sets.unified_standard_skin FILTER html %]"
           rel="stylesheet" type="text/css">
-
+   
     [% IF style %]
       <style type="text/css">
         [% style %]
@@ -113,7 +114,7 @@
       [% starting_js_urls.push("js/yui/$yui_name/${yui_name}-min.js") %]
     [% END %]
     [%# YUI3 Scripts %]
-    [% FOREACH yui_name = yui3 %] 
+    [% FOREACH yui_name = yui3 %]
       [% starting_js_urls.push("js/yui3/$yui_name/${yui_name}-min.js") %]
     [% END %]
     [% starting_js_urls.push('js/global.js') %]
@@ -186,7 +187,7 @@
           [% END %]
         [% END %]
 
-        var Y = YUI({sync: true, bootstrap: false}).use('node'
+        var Y = YUI({bootstrap: false}).use('node'
           [% FOREACH module = yui3 %]
             [%~ %],'[% module FILTER js %]'
           [% END ~%]
@@ -220,7 +221,7 @@
         class="[% urlbase.replace('^https?://','').replace('/$','').replace('[-~@:/.]+','-') FILTER css_class_quote %]
                [% FOREACH class = bodyclasses %]
                  [%+ class FILTER css_class_quote %]
-               [% END %] yui-skin-sam">
+               [% END %] yui3-skin-sam">
 
   <div id="header">
     [% INCLUDE global/banner.html.tmpl %]

@@ -433,16 +433,15 @@ sub mtime_filter {
 #  5. Inline css passed to global/header.html.tmpl
 #  6. Custom Bugzilla stylesheet set
 
-sub css_files {
-    my ($style_urls, $yui, $yui_css) = @_;
+sub css_files { 
+    my ($style_urls, $yui) = @_;
 
     # global.css goes on every page.
     my @requested_css = ('skins/standard/global.css', @$style_urls);
 
     my @yui_required_css;
     foreach my $yui_name (@$yui) {
-        next if !$yui_css->{$yui_name};
-        push(@yui_required_css, "js/yui/assets/skins/sam/$yui_name.css");
+        push(@yui_required_css, "js/yui3/assets/skins/sam/$yui_name.css");
     }
     unshift(@requested_css, @yui_required_css);
     
