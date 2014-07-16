@@ -18,10 +18,10 @@
 'attribute-complex',
 'event-synthetic',
 'event-focus',
-'node-style',
-'skin-sam-widget-base',
+'node-style','stylesheet',
+'skin-sam-widget-base','color-  base',
 'widget-base','widget-htmlparser','widget-skin','widget-uievents','skin-sam-datatable-base','datatable-base','datatable-datasource','event-valuechange' , 'autocomplete-base', 'array-invoke', 'arraylist', 'json-parse', 'model', 'model-list', 'datatable-core', 'view',
-    'datatable-head', 'datatable-body', 'datatable-table', 'skin-sam-datatable-base', 'datatable-base', 'intl-base', 'intl', 'lang/calendar-base', 'datatype-date-parse', 'lang/datatype-date-format', 'datatype-date-format', 'datatype-date-math', 'cssgrids', 'skin-sam-calendar-base', 'calendar-base', 'plugin', 'node-pluginhost', 'dom-screen', 'node-screen', 'skin-sam-calendarnavigator', 'calendarnavigator', 'skin-sam-calendar', 'calendar', 'cookie' ]
+    'datatable-head','datatable-message', 'datatable-body', 'datatable-table', 'skin-sam-datatable-base', 'datatable-base', 'intl-base', 'intl', 'lang/calendar-base', 'datatype-date-parse', 'lang/datatype-date-format', 'datatype-date-format', 'datatype-date-math', 'cssgrids', 'skin-sam-calendar-base', 'calendar-base', 'plugin', 'node-pluginhost', 'dom-screen', 'node-screen', 'skin-sam-calendarnavigator', 'calendarnavigator', 'skin-sam-calendar', 'calendar', 'cookie' ]
   style_urls = ['skins/standard/bug.css']
   javascript_urls = [ "js/attachment.js", "js/util.js",
                       "js/field.js", "js/TUI.js", "js/bug.js" ]
@@ -444,15 +444,17 @@ TUI_hide_default('attachment_text_field');
         <script type="text/javascript">
           var dt_columns = [ 
               { key: "id", label: "[% field_descs.bug_id FILTER js %]",
-                formatter: YUI.bugzilla.dupTable.formatBugLink },
+                formatter: YUI.bugzilla.dupTable.formatBugLink,
+                allowHTML : true },
               { key: "summary", 
                 label: "[% field_descs.short_desc FILTER js %]",
-                formatter: "text" },
+                 },
               { key: "status",
                 label: "[% field_descs.bug_status FILTER js %]",
                 formatter: YUI.bugzilla.dupTable.formatStatus },
               { key: "update_token", label: '',
-                formatter: YUI.bugzilla.dupTable.formatCcButton }
+                nodeFormatter: YUI.bugzilla.dupTable.formatCcButton,
+                allowHTML: true }
           ];
           YUI.bugzilla.dupTable.addCcMessage = "Add Me to the CC List";
           YUI.bugzilla.dupTable.init({
@@ -461,9 +463,8 @@ TUI_hide_default('attachment_text_field');
             product_name: '[% product.name FILTER js %]',
             summary_field: 'short_desc',
             options: {
-              MSG_LOADING: 'Searching for possible duplicates...',
-              MSG_EMPTY:   'No possible duplicates found.',
-              SUMMARY:     'Possible Duplicates'
+              loadingMessage: 'Searching for possible duplicates...',
+              emptyMessage:   'No possible duplicates found.'
             }
           });
         </script>

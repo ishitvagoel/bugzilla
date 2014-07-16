@@ -9,7 +9,7 @@
 /* This library assumes that the needed YUI libraries have been loaded 
    already. */
 
-YUI.bugzilla.dupTable = { // Is this usage of YUI global object correct ?
+YUI.bugzilla.dupTable = {
     counter: 0,
     dataSource: null,
     updateTable: function(dataTable, product_name, summary_field) {
@@ -28,7 +28,7 @@ YUI.bugzilla.dupTable = { // Is this usage of YUI global object correct ?
             }
         };
         var post_data = Y.JSON.stringify(json_object);
-        
+        dataTable.showMessage("loadingMessage");
         Y.one('#possible_duplicates_container').removeClass('bz_default_hidden');
         dataTable.datasource.load({
             request: post_data,
@@ -54,35 +54,35 @@ YUI.bugzilla.dupTable = { // Is this usage of YUI global object correct ?
             YUI.bugzilla.dupTable.updateTable(dt, product_name, summary) },
             600);
     },
-    formatBugLink: function(el) {//* What are the types of the arguments in all the formatter function. Couldn't identify it using the Debugger.
-        el.value = '<a href="show_bug.cgi?id=' + el.value + '">' 
-                       + el.value + '</a>';
+    formatBugLink: function(el) {
+        el.value = '<a href="show_bug.cgi?id=' + el.data.id + '">' 
+                       + el.data.id + '</a>';
     },
     formatStatus: function(el) {
         var resolution = el.data.resolution;
         var bug_status = display_value('bug_status', el.data.status);
         if (resolution) {
-            el.data.resolution = bug_status + ' ' 
+            el.value = bug_status + ' ' 
                            + display_value('resolution', resolution);
         }
         else {
-            el.data.resolution = bug_status;
+            el.value = bug_status;
         }
     },
     formatCcButton: function(el) {
         var url = 'process_bug.cgi?id=' + el.data.id 
-                  + '&addselfcc=1&token=' + escape(el.data.update_token);
-        var button = Y.Node.create('<button id = formatCcButton_' + el.data.id + '></button>');
+                  + '&addselfcc=1&token=' + (el.data.update_token);
+        var button = Y.Node.create('<button type="button" id = formatCcButton_' + el.data.id + '></button>');
         button.set('text', YUI.bugzilla.dupTable.addCcMessage);
-        //el.appendChild(Y.getDOMNode(button));
+        el.cell.appendChild(button);
         new Y.Button({
-            srcNode: '#formatCcButton_' + oRecord.getData('id'),
+            srcNode: '#formatCcButton_' + el.data.id,
             on:{
                 click: function(){
-                    window.open(url, "_self");
+                   window.open(url, "_self");
                 }
             }
-        }).render();
+            }).render();
     },
     init_ds: function() {
         var new_ds = new Y.DataSource.IO({
@@ -103,7 +103,8 @@ YUI.bugzilla.dupTable = { // Is this usage of YUI global object correct ?
         if (this.dataSource == null) this.init_ds();
         var dt = new Y.DataTable({
             columns: data.columns,
-            strings: data.options
+            strings: data.options,
+            summary : 'Possible Duplicates'
         });
         dt.plug(Y.Plugin.DataTableDataSource, {
             datasource: this.dataSource
@@ -231,3 +232,4 @@ function set_assign_to(use_qa_contact) {
         },
     };
 })();
+    
