@@ -82,7 +82,7 @@ YUI.bugzilla.dupTable = {
                    window.open(url, "_self");
                 }
             }
-            }).render();
+        }).render();
     },
     init_ds: function() {
         var new_ds = new Y.DataSource.IO({
@@ -160,10 +160,7 @@ function set_assign_to(use_qa_contact) {
         for (var i = 0; i < flag_rows.size(); i++) {
             // Each flag table row should have one flag form select element
             // We get the flag type id from the id attribute of the select.
-            var flag_select = flag_rows.item(i).all('select .flag_select').item(0);
-            if(!flag_select){
-                return;
-            } 
+            var flag_select = flag_rows.item(i).all('.flag_select').item(0); // is it correct ? Now the problem of flag_select being null is removed.
             var type_id = flag_select.get('id').split('-')[1];
             var can_set = flag_select.get('options').size() > 1 ? 1 : 0; //* or flag_select.options.size() ? How do we identify which properties are meant to be accessed through the get function and which can be accessed directly ?
             var show = 0;
