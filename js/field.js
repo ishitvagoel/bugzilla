@@ -18,40 +18,39 @@ function validateEnterBug(theform) {
         return true;
     }
 
-    var component = theform.component;
-    var short_desc = theform.short_desc;
-    var version = theform.version;
-    var bug_status = theform.bug_status;
+    var component = theform.component;// node not needed
+    var short_desc = theform.short_desc;// node not needed
+    var version = theform.version;// node not needed
+    var bug_status = theform.bug_status;// node not needed
     var description = theform.comment;
     var attach_data = theform.data;
     var attach_desc = theform.description;
-
-    var current_errors = YAHOO.util.Dom.getElementsByClassName(
-        'validation_error_text', null, theform);
-    for (var i = 0; i < current_errors.length; i++) {
-        current_errors[i].parentNode.removeChild(current_errors[i]);
+    
+    theform = Y.Node(theform);
+    var current_errors = theform.all('.validation_error_text');
+    for (var i = 0; i < current_errors.size(); i++) {
+        current_errors.item(i).ancestor().removeChild(current_errors.item(i));
     }
-    var current_error_fields = YAHOO.util.Dom.getElementsByClassName(
-        'validation_error_field', null, theform);
-    for (var i = 0; i < current_error_fields.length; i++) {
-        var field = current_error_fields[i];
-        YAHOO.util.Dom.removeClass(field, 'validation_error_field');
+    var current_error_fields = theform.all('.validation_error_field');
+    for (var i = 0; i < current_error_fields.size(); i++) {
+        var field = current_error_fields.item(i);
+       field.removeClass('validation_error_field');
     }
 
     var focus_me;
 
     // These are checked in the reverse order that they appear on the page,
     // so that the one closest to the top of the form will be focused.
-    if (attach_data.value && YAHOO.lang.trim(attach_desc.value) == '') {
+    if (attach_data.value && Y.Lang.trim(attach_desc.value == '') {
         _errorFor(attach_desc, 'attach_desc');
         focus_me = attach_desc;
     }
     var check_description = status_comment_required[bug_status.value];
-    if (check_description && YAHOO.lang.trim(description.value) == '') {
+    if (check_description && Y.Lang.trim(description.value) == '') {
         _errorFor(description, 'description');
         focus_me = description;
     }
-    if (YAHOO.lang.trim(short_desc.value) == '') {
+    if (Y.Lang.trim(short_desc.value) == '') {
         _errorFor(short_desc);
         focus_me = short_desc;
     }
@@ -73,14 +72,15 @@ function validateEnterBug(theform) {
 }
 
 function _errorFor(field, name) {
-    if (!name) name = field.id;
+    field = Y.Node(field);
+    if (!name) name = field.get('id');
     var string_name = name + '_required';
     var error_text = BUGZILLA.string[string_name];
-    var new_node = document.createElement('div');
-    YAHOO.util.Dom.addClass(new_node, 'validation_error_text');
-    new_node.innerHTML = error_text;
-    YAHOO.util.Dom.insertAfter(new_node, field);
-    YAHOO.util.Dom.addClass(field, 'validation_error_field');
+    var new_node = Y.Node.create('<div></div>');
+    new_node.addClass('validation_error_text');
+    new_node.set('innerHTML', error_text);
+    field.insert(new_node, "after");// To Confirm
+    field.addClass('validation_error_field');
 }
 
 /* This function is never to be called directly, but only indirectly
@@ -88,77 +88,79 @@ function _errorFor(field, name) {
  * works. For the same reason, if you modify this function's parameter list,
  * you need to modify the documentation in said template as well. */
 function createCalendar(name, start_weekday, months_long, weekdays_short) {
-    var cal = new YAHOO.widget.Calendar('calendar_' + name, 
-                                        'con_calendar_' + name,
-                                        { START_WEEKDAY:  start_weekday,
-                                          MONTHS_LONG:    months_long,
-                                          WEEKDAYS_SHORT: weekdays_short
-                                        });
-    YAHOO.bugzilla['calendar_' + name] = cal;
+    var cal = new Y.Calendar({
+        contentBox: '#con_calendar' + name,
+        showPrevMonth: true,
+        showNextMonth: true,
+        date: new Date()    
+    });
+    cal.set('strings.first_weekday', start_weekday); // as per http://yuilibrary.com/forum-archive/forum/viewtopic.php@p=30610.html
+    cal.set('strings.very_short_weekdays', weekdays_short);
+    YUI.bugzilla['calendar_' + name] = cal;
     var field = document.getElementById(name);
-    cal.selectEvent.subscribe(setFieldFromCalendar, field, false);
+    cal.on("selectionChange", setFieldFromCalendar, null, field);    
     updateCalendarFromField(field);
     cal.render();
 }
-
+    
 /* The onclick handlers for the button that shows the calendar. */
 function showCalendar(field_name) {
-    var calendar  = YAHOO.bugzilla["calendar_" + field_name];
+    var calendar  = YUI.bugzilla["calendar_" + field_name];
     var field     = document.getElementById(field_name);
-    var button    = document.getElementById('button_calendar_' + field_name);
-
-    bz_overlayBelow(calendar.oDomContainer, field);
+    var calendar_container = calendar.get('contentBox').getDOMNode();
+    bz_overlayBelow(calendar_container, field);
     calendar.show();
-    button.onclick = function() { hideCalendar(field_name); };
+    Y.one('#button_calendar_' + field_name).on('click', function() { 
+        hideCalendar(field_name);
+    });
 
     // Because of the way removeListener works, this has to be a function
     // attached directly to this calendar.
     calendar.bz_myBodyCloser = function(event) {
-        var container = this.oDomContainer;
-        var target    = YAHOO.util.Event.getTarget(event);
+        var container = this.get('contentBox'); // To confirm
+        var target    = event.target;//To confirm if target is a YUI node or not.
         if (target != container && target != button
-            && !YAHOO.util.Dom.isAncestor(container, target))
+            && !container.contains(target))
         {
             hideCalendar(field_name);
         }
     };
 
     // If somebody clicks outside the calendar, hide it.
-    YAHOO.util.Event.addListener(document.body, 'click', 
-                                 calendar.bz_myBodyCloser, calendar, true);
+    Y.one('body').on('click', calendar.bz_myBodyCloser, calendar) ;
 
     // Make Esc close the calendar.
     calendar.bz_escCal = function (event) {
-        var key = YAHOO.util.Event.getCharCode(event);
+        var key = event.charCode; // To confirm
         if (key == 27) {
             hideCalendar(field_name);
         }
     };
-    YAHOO.util.Event.addListener(document.body, 'keydown', calendar.bz_escCal);
+    Y.one('body').on('keydown', calendar.bz_escCal);
 }
 
 function hideCalendar(field_name) {
-    var cal = YAHOO.bugzilla["calendar_" + field_name];
-    cal.hide();
-    var button = document.getElementById('button_calendar_' + field_name);
-    button.onclick = function() { showCalendar(field_name); };
-    YAHOO.util.Event.removeListener(document.body, 'click',
-                                    cal.bz_myBodyCloser);
-    YAHOO.util.Event.removeListener(document.body, 'keydown', cal.bz_escCal);
+    var cal = YUI.bugzilla["calendar_" + field_name];
+    cal.hide(); 
+    Y.one('#button_calendar_' + field_name).on('click', function() { 
+        showCalendar(field_name);
+    });
+    var documentBody = Y.one('body');
+    documentBody.detach('click',cal.bz_myBodyCloser);
+    documentBody.detach('keydown', cal.bz_escCal);
 }
 
 /* This is the selectEvent for our Calendar objects on our custom 
  * DateTime fields.
  */
-function setFieldFromCalendar(type, args, date_field) {
-    var dates = args[0];
-    var setDate = dates[0];
+function setFieldFromCalendar(ev,data_field) {//How do we pass the parameters data_field ?
+    var dates = ev.newSelection[0];
 
     // We can't just write the date straight into the field, because there 
     // might already be a time there.
     var timeRe = /\b(\d{1,2}):(\d\d)(?::(\d\d))?/;
-    var currentTime = timeRe.exec(date_field.value);
-    var d = new Date(setDate[0], setDate[1] - 1, setDate[2]);
+    var currentTime = timeRe.exec(date_field.values);
+    var d = Y.Date.parse(dates);
     if (currentTime) {
         d.setHours(currentTime[1], currentTime[2]);
         if (currentTime[3]) {
@@ -197,11 +199,11 @@ function updateCalendarFromField(date_field) {
     var pieces = dateRe.exec(date_field.value);
     if (pieces) {
         var cal = YAHOO.bugzilla["calendar_" + date_field.id];
-        cal.select(new Date(pieces[1], pieces[2] - 1, pieces[3]));
-        var selectedArray = cal.getSelectedDates();
+        cal.selectDates(new Date(pieces[1], pieces[2] - 1, pieces[3]));
+        var selectedArray = cal.get('selectedDates');
         var selected = selectedArray[0];
-        cal.cfg.setProperty("pagedate", (selected.getMonth() + 1) + '/' 
-                                        + selected.getFullYear());
+        cal.set("date", (selected.getMonth() + 1) + '/' 
+                                        + selected.getFullYear()); // date is used to set the current visible date.
         cal.render();
     }
 }
@@ -215,12 +217,12 @@ function setupEditLink(id) {
 
 /* Hide input/select fields and show the text with (edit) next to it */
 function hideEditableField( container, input, action, field_id, original_value, new_value, hide_input ) {
-    YAHOO.util.Dom.removeClass(container, 'bz_default_hidden');
-    YAHOO.util.Dom.addClass(input, 'bz_default_hidden');
-    YAHOO.util.Event.addListener(action, 'click', showEditableField,
+    Y.one('#' + container).removeClass('bz_default_hidden');
+    Y.one('#' + input).addClass('bz_default_hidden');
+    Y.one('#' + action).on('click', showEditableField, null,
                                  new Array(container, input, field_id, new_value));
     if(field_id != ""){
-        YAHOO.util.Event.addListener(window, 'load', checkForChangedFieldValues,
+        Y.on('load', checkForChangedFieldValues, null, //To confirm whether Y.on will be good enough ?
                         new Array(container, input, field_id, original_value, hide_input ));
     }
 }
@@ -237,31 +239,31 @@ function hideEditableField( container, input, action, field_id, original_value, 
  */
 function showEditableField (e, ContainerInputArray) {
     var inputs = new Array();
-    var inputArea = YAHOO.util.Dom.get(ContainerInputArray[1]);    
+    var inputArea = Y.one('#' + ContainerInputArray[1]);    
     if ( ! inputArea ){
-        YAHOO.util.Event.preventDefault(e);
+        e.preventDefault();
         return;
     }
-    YAHOO.util.Dom.addClass(ContainerInputArray[0], 'bz_default_hidden');
-    YAHOO.util.Dom.removeClass(inputArea, 'bz_default_hidden');
-    if ( inputArea.tagName.toLowerCase() == "input" ) {
+    Y.one('#' + ContainerInputArray[0]).addClass('bz_default_hidden');
+    inputArea.removeClass('bz_default_hidden');
+    if ( inputArea.get('tagName').toLowerCase() == "input" ) {
         inputs.push(inputArea);
     } else if (ContainerInputArray[2]) {
-        inputs.push(document.getElementById(ContainerInputArray[2]));
+        inputs.push(Y.one('#' + ContainerInputArray[2]));
     } else {
-        inputs = inputArea.getElementsByTagName('input');
+        inputs = inputArea.all('input');
     }
     if ( inputs.length > 0 ) {
         // Change the first field's value to ContainerInputArray[2]
         // if present before focusing.
-        var type = inputs[0].tagName.toLowerCase();
+        var type = inputs[0].get('tagName').toLowerCase();
         if (ContainerInputArray[3]) {
             if ( type == "input" ) {
-                inputs[0].value = ContainerInputArray[3];
+                inputs[0].get('value') = ContainerInputArray[3];
             } else {
-                for (var i = 0; inputs[0].length; i++) {
-                    if ( inputs[0].options[i].value == ContainerInputArray[3] ) {
-                        inputs[0].options[i].selected = true;
+                for (var i = 0; inputs[0].size(); i++) {
+                    if ( inputs[0].get('options').item(i).get('value') == ContainerInputArray[3] ) { //To confirm the access of options NodeList here.
+                        inputs[0].get('options')item(i).set('selected', true);
                         break;
                     }
                 }
@@ -273,7 +275,7 @@ function showEditableField (e, ContainerInputArray) {
             inputs[0].select();
         }
     }
-    YAHOO.util.Event.preventDefault(e);
+    e.preventDefault();
 }
 
 
@@ -310,8 +312,8 @@ function checkForChangedFieldValues(e, ContainerInputArray ) {
         }
     }
     if(unhide){
-        YAHOO.util.Dom.addClass(ContainerInputArray[0], 'bz_default_hidden');
-        YAHOO.util.Dom.removeClass(ContainerInputArray[1], 'bz_default_hidden');
+        Y.one('#' + ContainerInputArray[0]).addClass('bz_default_hidden');
+        Y.one('#' + ContainerInputArray[1]).removeClass('bz_default_hidden');
     }
 
 }
@@ -323,16 +325,15 @@ function hideAliasAndSummary(short_desc_value, alias_value) {
     // check that the alias hasn't changed
     var bz_alias_check_array = new Array('summary_alias_container',
                                      'summary_alias_input', 'alias', alias_value);
-    YAHOO.util.Event.addListener( window, 'load', checkForChangedFieldValues,
-                                 bz_alias_check_array);
+    Y.on('load', checkForChangedFieldValues, null, bz_alias_check_array);
 }
 
 function showPeopleOnChange( field_id_list ) {
     for(var i = 0; i < field_id_list.length; i++) {
-        YAHOO.util.Event.addListener( field_id_list[i],'change', showEditableField,
+        Y.one('#' + field_id_list[i]).on('change', showEditableField, null,
                                       new Array('bz_qa_contact_edit_container',
                                                 'bz_qa_contact_input'));
-        YAHOO.util.Event.addListener( field_id_list[i],'change',showEditableField,
+        Y.one('#' + field_id_list[i]).on('change',showEditableField, null
                                       new Array('bz_assignee_edit_container',
                                                 'bz_assignee_input'));
     }
@@ -341,29 +342,28 @@ function showPeopleOnChange( field_id_list ) {
 function assignToDefaultOnChange(field_id_list, default_assignee, default_qa_contact) {
     showPeopleOnChange(field_id_list);
     for(var i = 0, l = field_id_list.length; i < l; i++) {
-        YAHOO.util.Event.addListener(field_id_list[i], 'change', function(evt, defaults) {
+        Y.one('#' + field_id_list[i]).on('change', function(evt, defaults) {
             if (document.getElementById('assigned_to').value == defaults[0]) {
-                setDefaultCheckbox(evt, 'set_default_assignee');
+                setDefaultCheckbox(evt, 'set_default_assignee');//What is the use of passing evt as an argument. In the method definition the evt argument is not used.
             }
             if (document.getElementById('qa_contact')
                 && document.getElementById('qa_contact').value == defaults[1])
             {
                 setDefaultCheckbox(evt, 'set_default_qa_contact');
             }
-        }, [default_assignee, default_qa_contact]);
+        }, null, [default_assignee, default_qa_contact]);
     }
 }
 
 function initDefaultCheckbox(field_id){
-    YAHOO.util.Event.addListener( 'set_default_' + field_id,'change', boldOnChange,
+    Y.one('#' + 'set_default_' + field_id).on('change', boldOnChange, null,
                                   'set_default_' + field_id);
-    YAHOO.util.Event.addListener( window,'load', checkForChangedFieldValues,
+    Y.on('load', checkForChangedFieldValues, null,
                                   new Array( 'bz_' + field_id + '_edit_container',
                                              'bz_' + field_id + '_input',
                                              'set_default_' + field_id ,'1'));
     
-    YAHOO.util.Event.addListener( window, 'load', boldOnChange,
-                                 'set_default_' + field_id ); 
+    Y.on('load', boldOnChange, null, 'set_default_' + field_id ); 
 }
 
 function showHideStatusItems(e, dupArrayInfo) {
@@ -381,21 +381,19 @@ function showHideStatusItems(e, dupArrayInfo) {
             resolution.insertBefore(emptyOption, resolution.options[0]);
             emptyOption.selected = true;
         }
-        YAHOO.util.Dom.addClass('resolution_settings', 'bz_default_hidden');
-        if (document.getElementById('resolution_settings_warning')) {
-            YAHOO.util.Dom.addClass('resolution_settings_warning',
-                                    'bz_default_hidden');
+        Y.one('#resolution_settings').addClass('bz_default_hidden');
+        var resolution_settings_warning = Y.one('#resolution_settings_warning');
+        if (resolution_settings_warning) {
+            resolution_settings_warning.addClass('bz_default_hidden');
         }
-        YAHOO.util.Dom.addClass('duplicate_display', 'bz_default_hidden');
+        Y.one('#duplicate_display').addClass('bz_default_hidden');
 
 
         if ( (el.value == dupArrayInfo[1] && dupArrayInfo[0] == "is_duplicate")
              || bz_isValueInArray(close_status_array, el.value) ) 
         {
-            YAHOO.util.Dom.removeClass('resolution_settings', 
-                                       'bz_default_hidden');
-            YAHOO.util.Dom.removeClass('resolution_settings_warning', 
-                                       'bz_default_hidden');
+            Y.one('#resolution_settings').removeClass('bz_default_hidden');
+            Y.one('#resolution_settings_warning').removeClass('bz_default_hidden');
 
             // Remove the blank option we inserted.
             if (resolution && resolution.options[0].value == '') {
@@ -413,67 +411,65 @@ function showHideStatusItems(e, dupArrayInfo) {
 function showDuplicateItem(e) {
     var resolution = document.getElementById('resolution');
     var bug_status = document.getElementById('bug_status');
-    var dup_id = document.getElementById('dup_id');
+    var dup_id = Y.one('#dup_id');
     if (resolution) {
         if (resolution.value == 'DUPLICATE' && bz_isValueInArray( close_status_array, bug_status.value) ) {
             // hide resolution show duplicate
-            YAHOO.util.Dom.removeClass('duplicate_settings', 
-                                       'bz_default_hidden');
-            YAHOO.util.Dom.addClass('dup_id_discoverable', 'bz_default_hidden');
+            Y.one('#duplicate_settings').removeClass('bz_default_hidden');
+            Y.one('#dup_id_discoverable').addClass('bz_default_hidden');
             // check to make sure the field is visible or IE throws errors
-            if( ! YAHOO.util.Dom.hasClass( dup_id, 'bz_default_hidden' ) ){
+            if( ! dup_id.hasClass( 'bz_default_hidden' ) ){
                 dup_id.focus();
                 dup_id.select();
             }
         }
         else {
-            YAHOO.util.Dom.addClass('duplicate_settings', 'bz_default_hidden');
-            YAHOO.util.Dom.removeClass('dup_id_discoverable', 
-                                       'bz_default_hidden');
+            Y.one('#duplicate_settings').addClass('bz_default_hidden');
+            Y.one('#dup_id_discoverable').removeClass('bz_default_hidden');
             dup_id.blur();
         }
     }
-    YAHOO.util.Event.preventDefault(e); //prevents the hyperlink from going to the url in the href.
+    e.preventDefault(); //prevents the hyperlink from going to the url in the href.
 }
 
 function setResolutionToDuplicate(e, duplicate_or_move_bug_status) {
     var status = document.getElementById('bug_status');
     var resolution = document.getElementById('resolution');
-    YAHOO.util.Dom.addClass('dup_id_discoverable', 'bz_default_hidden');
+    Y.one('#dup_id_discoverable').addClass('bz_default_hidden');
     status.value = duplicate_or_move_bug_status;
     bz_fireEvent(status, 'change');
     resolution.value = "DUPLICATE";
     bz_fireEvent(resolution, 'change');
-    YAHOO.util.Event.preventDefault(e);
+    e.preventDefault();
 }
-
+    
 function setDefaultCheckbox(e, field_id) {
     var el = document.getElementById(field_id);
-    var elLabel = document.getElementById(field_id + "_label");
+    var elLabel = Y.one('#' + field_id + "_label");
     if( el && elLabel ) {
         el.checked = "true";
-        YAHOO.util.Dom.setStyle(elLabel, 'font-weight', 'bold');
+        elLabel.setStyle('fontWeight', 'bold');
     }
 }
 
 function boldOnChange(e, field_id){
     var el = document.getElementById(field_id);
-    var elLabel = document.getElementById(field_id + "_label");
+    var elLabel = Y.one('#' + field_id + "_label");
     if( el && elLabel ) {
         if( el.checked ){
-            YAHOO.util.Dom.setStyle(elLabel, 'font-weight', 'bold');
+            elLabel.setStyle('fontWeight', 'bold');
         }
         else{
-            YAHOO.util.Dom.setStyle(elLabel, 'font-weight', 'normal');
+            elLabel.setStyle('fontWeight', 'normal');
         }
     }
 }
 
-function updateCommentTagControl(checkbox, field) {
+function updateCommentTagControl(checkbox, field) { // Need to correct in comments.html.tmpl
     if (checkbox.checked) {
-        YAHOO.util.Dom.addClass(field, 'bz_private');
+        Y.one('#field').addClass('bz_private');
     } else {
-        YAHOO.util.Dom.removeClass(field, 'bz_private');
+        Y.one('#field').removeClass('bz_private');
     }
 }
 
@@ -497,11 +493,10 @@ function setClassification() {
  * been added to the DOM.
  */
 function showFieldWhen(controlled_id, controller_id, values) {
-    var controller = document.getElementById(controller_id);
     // Note that we don't get an object for "controlled" here, because it
     // might not yet exist in the DOM. We just pass along its id.
-    YAHOO.util.Event.addListener(controller, 'change',
-        handleVisControllerValueChange, [controlled_id, controller, values]);
+    Y.one('#controller_id').on('change',handleVisControllerValueChange, null,
+                              [controlled_id, controller, values]);
 }
 
 /**
@@ -513,10 +508,8 @@ function handleVisControllerValueChange(e, args) {
     var controller = args[1];
     var values = args[2];
 
-    var label_container = 
-        document.getElementById('field_label_' + controlled_id);
-    var field_container =
-        document.getElementById('field_container_' + controlled_id);
+    var label_container = Y.one('#field_label_' + controlled_id);
+    var field_container = Y.one('field_container_' + controlled_id);
     var selected = false;
     for (var i = 0; i < values.length; i++) {
         if (bz_valueSelected(controller, values[i])) {
@@ -526,12 +519,12 @@ function handleVisControllerValueChange(e, args) {
     }
 
     if (selected) {
-        YAHOO.util.Dom.removeClass(label_container, 'bz_hidden_field');
-        YAHOO.util.Dom.removeClass(field_container, 'bz_hidden_field');
+        label_container.removeClass('bz_hidden_field');
+        field_container.removeClass('bz_hidden_field');
     }
     else {
-        YAHOO.util.Dom.addClass(label_container, 'bz_hidden_field');
-        YAHOO.util.Dom.addClass(field_container, 'bz_hidden_field');
+        label_container.addClass('bz_hidden_field');
+        field_container.addClass('bz_hidden_field');
     }
 }
 
@@ -568,9 +561,9 @@ function showValueWhen(target_field_id, target_value_ids,
     source_values[source_value_id] = target_value_ids;
 
     if (!bz_value_controller_has_handler[source_field_id]) {
-        var source_field = document.getElementById(source_field_id);
-        YAHOO.util.Event.addListener(source_field, 'change',
-            handleValControllerChange, [source_field, empty_shows_all]);
+        var source_field = Y.one('#' + source_field_id);
+        source_field.on('change', handleValControllerChange, null,
+                                 [source_field, empty_shows_all]);
         bz_value_controller_has_handler[source_field_id] = true;
     }
 }
@@ -643,7 +636,7 @@ var bz_option_duplicate_count = {};
 function _show_option(option, field) {
     if (!option.disabled) return;
     option = showOptionInIE(option, field);
-    YAHOO.util.Dom.removeClass(option, 'bz_hidden_option');
+    Y.Node(option).removeClass('bz_hidden_option');// Using the Node contructor to get the YUI3 node.
     option.disabled = false;
 }
 
@@ -668,7 +661,7 @@ function _hide_option(option, field) {
         if (current <= dups) return;
     }
 
-    YAHOO.util.Dom.addClass(option, 'bz_hidden_option');
+    Y.Node(option).addClass('bz_hidden_option');
     option.selected = false;
     option.disabled = true;
     hideOptionInIE(option, field);
@@ -797,7 +790,7 @@ function browserCanHideOptions(aSelect) {
      * if it has a position, and then remove it. */
     if (typeof(browser_can_hide_options) == "undefined") {
         var new_opt = bz_createOptionInSelect(aSelect, '', '');
-        var opt_pos = YAHOO.util.Dom.getX(new_opt);
+        var opt_pos = Y.Node(new_opt).getX();
         aSelect.removeChild(new_opt);
         if (opt_pos) {
             browser_can_hide_options = true;
@@ -814,39 +807,57 @@ function browserCanHideOptions(aSelect) {
 /**
  * The Autoselect
  */
-YAHOO.bugzilla.userAutocomplete = {
+YUI.bugzilla.userAutocomplete = {
     counter : 0,
     dataSource : null,
     generateRequest : function ( enteredText ){ 
-      YAHOO.bugzilla.userAutocomplete.counter = 
-                                   YAHOO.bugzilla.userAutocomplete.counter + 1;
-      YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
+      YUI.bugzilla.userAutocomplete.counter = 
+                                   YUI.bugzilla.userAutocomplete.counter + 1;
+      Y.io.header('Content-Type', 'application/json'); // Sets the default Header
       var json_object = {
           method : "User.get",
-          id : YAHOO.bugzilla.userAutocomplete.counter,
+          id : YUI.bugzilla.userAutocomplete.counter,
           params : [ { 
             match : [ decodeURIComponent(enteredText) ],
             include_fields : [ "name", "real_name" ]
           } ]
       };
-      var stringified =  YAHOO.lang.JSON.stringify(json_object);
+      var stringified =  Y.JSON.stringify(json_object);
       var debug = { msg: "json-rpc obj debug info", "json obj": json_object, 
                     "param" : stringified}
-      YAHOO.bugzilla.userAutocomplete.debug_helper( debug );
+      YUI.bugzilla.userAutocomplete.debug_helper( debug );
       return stringified;
     },
-    resultListFormat : function(oResultData, enteredText, sResultMatch) {
-        return ( YAHOO.lang.escapeHTML(oResultData.real_name) + " ("
-                 + YAHOO.lang.escapeHTML(oResultData.name) + ")");
+    resultListFormat : function(query, results) {
+        return (results.real_name.display + " (" + results.name.display + ")");// To confirm the usage of results object. The display attirbute contains the HTML escaped values.
+
+        //return ( YAHOO.lang.escapeHTML(oResultData.real_name) + " ("
+          //       + YAHOO.lang.escapeHTML(oResultData.name) + ")");
     },
-    debug_helper : function ( ){
+    debug_helper : function ( evt ){
         /* used to help debug any errors that might happen */
         if( typeof(console) !== 'undefined' && console != null && arguments.length > 0 ){
             console.log("debug helper info:", arguments);
         }
         return true;
-    },    
+    },  
     init_ds : function(){
+        var new_ds = new Y.DataSource.IO({
+            source: "jsonrpc.cgi"
+        });
+        new_ds.plug(Y.Plugin.DataSourceJSONSchema, {
+            schema: {
+                resultListLocator: "result.users",
+                resultFields: [
+                    { key : "name" },
+                    { key : "real_name"}
+                ],
+                metaFields: { error: "error", jsonRpcId: "id"}
+            }
+        }).plug(Y.Plugin.DataSourceCache, { max: 5 });
+        
+        this.dataSource = new_ds;
+        /*
         this.dataSource = new YAHOO.util.XHRDataSource("jsonrpc.cgi");
         this.dataSource.connTimeout = 30000;
         this.dataSource.connMethodPost = true;
@@ -860,11 +871,30 @@ YAHOO.bugzilla.userAutocomplete = {
                 { key : "real_name"}
             ]
         };
+        */
     },
     init : function( field, container, multiple ) {
         if( this.dataSource == null ){
             this.init_ds();  
-        }            
+        }
+        var userAutoComp = new Y.AutoComplete({
+            inputNode: field,
+            render: container,
+            source: this.dataSource,
+            requestTemplate: this.generateRequest, //Should we change the name of the function ?
+            resultFormatter: this.resultListFormat,
+            maxResults: BUGZILLA.param.maxusermatches,
+            minQueryLength: 3,
+            queryDelay: 0.05,
+            //What about the useIFrame , autoHighlight and resultTypeList properties ?
+
+        });
+        if( multiple == true ){
+            userAutoComp.set('queryDelimiter', ',');
+        }
+        userAutoComp.render();
+        userAutoComp.on('results', debug_helper); // To confirm as an alternative to doBeforeLoadData function of YUI3.
+        /*
         var userAutoComp = new YAHOO.widget.AutoComplete( field, container, 
                                 this.dataSource );
         // other stuff we might want to do with the autocomplete goes here
@@ -873,16 +903,16 @@ YAHOO.bugzilla.userAutocomplete = {
         userAutoComp.formatResult = this.resultListFormat;
         userAutoComp.doBeforeLoadData = this.debug_helper;
         userAutoComp.minQueryLength = 3;
-        userAutoComp.autoHighlight = false;
+        userAutoComp.autoHighlight = false;//********************
         // this is a throttle to determine the delay of the query from typing
         // set this higher to cause fewer calls to the server
         userAutoComp.queryDelay = 0.05;
-        userAutoComp.useIFrame = true;
-        userAutoComp.resultTypeList = false;
+        userAutoComp.useIFrame = true; //*********************
+        userAutoComp.resultTypeList = false;//*************************
         if( multiple == true ){
             userAutoComp.delimChar = [","];
         }
-        
+        */
     }
 };
 
@@ -890,14 +920,28 @@ YAHOO.bugzilla.fieldAutocomplete = {
     dataSource : [],
     init_ds : function( field ) {
         this.dataSource[field] =
-          new YAHOO.util.LocalDataSource( YAHOO.bugzilla.field_array[field] );
+          new Y.DataSource.Local( { source: YAHOO.bugzilla.field_array[field] } );
+          //new YAHOO.util.LocalDataSource( YAHOO.bugzilla.field_array[field] );
     },
     init : function( field, container ) {
         if( this.dataSource[field] == null ) {
             this.init_ds( field );
         }
         var fieldAutoComp =
-          new YAHOO.widget.AutoComplete(field, container, this.dataSource[field]);
+          new Y.AutoComplete({
+            inputNode: field,
+            render: container,
+            source: this.dataSource[field],
+            maxResults: YAHOO.bugzilla.field_array[field].length,
+            //resultFormatter: To ask about the formatEscapedResult function.
+            //What about the useIFrame , autoHighlight and resultTypeList properties ?
+            minQueryLength: 0,
+            queryDelimiter: [","," "], // Are we allowed to use the array of delimiters in YUI 3?
+            queryDelay: 0,
+          });
+         fieldAutoComp.render(); 
+
+          /*
         fieldAutoComp.maxResultsDisplayed = YAHOO.bugzilla.field_array[field].length;
         fieldAutoComp.formatResult = fieldAutoComp.formatEscapedResult;
         fieldAutoComp.minQueryLength = 0;
@@ -905,6 +949,8 @@ YAHOO.bugzilla.fieldAutocomplete = {
         fieldAutoComp.delimChar = [","," "];
         fieldAutoComp.resultTypeList = false;
         fieldAutoComp.queryDelay = 0;
+        
+        */
         /*  Causes all the possibilities in the field to appear when a user
          *  focuses on the textbox 
          */
@@ -943,7 +989,7 @@ function userDisabledTextOnChange(disabledtext) {
 function initDirtyFieldTracking() {
     // old IE versions don't provide the information we need to make this fix work
     // however they aren't affected by this issue, so it's ok to ignore them
-    if (YAHOO.env.ua.ie > 0 && YAHOO.env.ua.ie <= 8) return;
+    if (Y.UA.ie > 0 && Y.UA.ie <= 8) return;
     var selects = document.getElementById('changeform').getElementsByTagName('select');
     for (var i = 0, l = selects.length; i < l; i++) {
         var el = selects[i];
@@ -960,12 +1006,13 @@ function initDirtyFieldTracking() {
                 }
             }
         }
-        YAHOO.util.Event.on(el, "change", function(e) {
+
+        Y.Node(el).on("change", function(e) { // Should we convert the el to a Node instance like this or convert el into a node instance everywhere in this function ?
             var el = e.target || e.srcElement;
-            var preSelected = bz_preselectedOptions(el);
-            var currentSelected = bz_selectedOptions(el);
+            var preSelected = bz_preselectedOptions(el.getDOMNode());
+            var currentSelected = bz_selectedOptions(el.getDOMNode());
             var isDirty = false;
-            if (!el.multiple) {
+            if (!el.get('multiple')) {
                 isDirty = preSelected.index != currentSelected.index;
             } else {
                 if (preSelected.length != currentSelected.length) {
@@ -979,7 +1026,7 @@ function initDirtyFieldTracking() {
                     }
                 }
             }
-            document.getElementById(el.name + '_dirty').value = isDirty ? '1' : '';
+            document.getElementById(el.get('name') + '_dirty').value = isDirty ? '1' : '';
         });
     }
 }
@@ -991,83 +1038,91 @@ function initDirtyFieldTracking() {
 var last_comment_text = '';
 
 function show_comment_preview(bug_id) {
-    var Dom = YAHOO.util.Dom;
-    var comment = document.getElementById('comment');
-    var preview = document.getElementById('comment_preview');
+    //var Dom = YAHOO.util.Dom;
+    var comment = Y.one('#comment');
+    var preview = Y.one('#comment_preview');
 
     if (!comment || !preview) return;
-    if (Dom.hasClass('comment_preview_tab', 'active_comment_tab')) return;
+    if (Y.one('#comment_preview_tab').hasClass('active_comment_tab')) return;
 
-    preview.style.width = (comment.clientWidth - 4) + 'px';
-    preview.style.height = comment.offsetHeight + 'px';
+    preview.get('style').width = (comment.get('clientWidth') - 4) + 'px';
+    preview.get('style').height = comment.get('offsetHeight') + 'px';
 
-    var comment_tab = document.getElementById('comment_tab');
-    Dom.addClass(comment, 'bz_default_hidden');
-    Dom.removeClass(comment_tab, 'active_comment_tab');
+    var comment_tab = Y.one('#comment_tab');
+    comment.addClass('bz_default_hidden');
+    comment_tab.removeClass('active_comment_tab');
     comment_tab.setAttribute('aria-selected', 'false');
 
-    var preview_tab = document.getElementById('comment_preview_tab');
-    Dom.removeClass(preview, 'bz_default_hidden');
-    Dom.addClass(preview_tab, 'active_comment_tab');
+    var preview_tab = Y.one('#comment_preview_tab');
+    preview.removeClass('bz_default_hidden');
+    preview_tab.addClass('active_comment_tab');
     preview_tab.setAttribute('aria-selected', 'true');
 
-    Dom.addClass('comment_preview_error', 'bz_default_hidden');
+    Y.one('#comment_preview_error').addClass('bz_default_hidden');
 
-    if (last_comment_text == comment.value)
+    if (last_comment_text == comment.get('value'))
         return;
 
-    Dom.addClass('comment_preview_text', 'bz_default_hidden');
-    Dom.removeClass('comment_preview_loading', 'bz_default_hidden');
+    Y.one('#comment_preview_text').addClass('bz_default_hidden');
+    Y.one('#comment_preview_loading').removeClass('bz_default_hidden');
 
-    YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
-    YAHOO.util.Connect.asyncRequest('POST', 'jsonrpc.cgi',
-    {
+    Y.io.header('Content-Type', 'application/json');
+    var callbacks = {
         success: function(res) {
-            data = YAHOO.lang.JSON.parse(res.responseText);
+            data = Y.JSON.parse(res.responseText);
             if (data.error) {
-                Dom.addClass('comment_preview_loading', 'bz_default_hidden');
-                Dom.removeClass('comment_preview_error', 'bz_default_hidden');
-                Dom.get('comment_preview_error').innerHTML =
-                    YAHOO.lang.escapeHTML(data.error.message);
+                Y.one('#comment_preview_loading').addClass('bz_default_hidden');
+                var comment_preview_error = Y.one('#comment_preview_error');
+                comment_preview_error.removeClass('bz_default_hidden');
+                comment_preview_error.set('innerHTML', Y.Escape.html(data.error.message));
+            // or comment_preview_error.set('text',data.error.message); ?
             } else {
-                document.getElementById('comment_preview_text').innerHTML = data.result.html;
-                Dom.addClass('comment_preview_loading', 'bz_default_hidden');
-                Dom.removeClass('comment_preview_text', 'bz_default_hidden');
-                last_comment_text = comment.value;
+                var comment_preview_text = Y.one('#comment_preview_text');
+                comment_preview_text.set('innerHTML', data.result.html);
+                Y.one('#comment_preview_loading').addClass('bz_default_hidden');
+                Y.one('#comment_preview_text').removeClass('bz_default_hidden');
+                last_comment_text = comment.get('value');
             }
         },
         failure: function(res) {
-            Dom.addClass('comment_preview_loading', 'bz_default_hidden');
-            Dom.removeClass('comment_preview_error', 'bz_default_hidden');
-            Dom.get('comment_preview_error').innerHTML =
-                YAHOO.lang.escapeHTML(res.responseText);
+            Y.one('#comment_preview_loading').addClass('bz_default_hidden');
+            var comment_preview_error = Y.one('#comment_preview_error');
+            comment_preview_error.removeClass('bz_default_hidden');
+            comment_preview_error.set('innerHTML', Y.Escape.html(res.responseText));
+            //or comment_preview_error.set('text',res.responseText); ?
         }
-    },
-    YAHOO.lang.JSON.stringify({
+    };
+    var post_data = Y.JSON.stringify({
         version: "1.1",
         method: 'Bug.render_comment',
         params: {
             id: bug_id,
             text: comment.value
         }
-    })
-    );
+    });
+    Y.io('jsonrpc.cgi',{
+        method: 'POST',
+        data: post_data,
+        headers: {'Content-Type': 'application/json'},
+        on: callbacks
+                    
+    });
 }
 
 function show_comment_edit() {
-    var comment = document.getElementById('comment');
-    var preview = document.getElementById('comment_preview');
+    var comment = Y.one('#comment');
+    var preview = Y.one('#comment_preview');
     if (!comment || !preview) return;
-    if (YAHOO.util.Dom.hasClass(comment, 'active_comment_tab')) return;
+    if (comment.hasClass('active_comment_tab')) return;
 
-    var preview_tab = document.getElementById('comment_preview_tab');
-    YAHOO.util.Dom.addClass(preview, 'bz_default_hidden');
-    YAHOO.util.Dom.removeClass(preview_tab, 'active_comment_tab');
+    var preview_tab = Y.one('#comment_preview_tab');
+    preview.addClass('bz_default_hidden');
+    preview_tab.removeClass('active_comment_tab');
     preview_tab.setAttribute('aria-selected', 'false');
 
-    var comment_tab = document.getElementById('comment_tab');
-    YAHOO.util.Dom.removeClass(comment, 'bz_default_hidden');
-    YAHOO.util.Dom.addClass(comment_tab, 'active_comment_tab');
+    var comment_tab = Y.one('#comment_tab');
+    comment.removeClass('bz_default_hidden');
+    comment_tab.addClass('active_comment_tab');
     comment_tab.setAttribute('aria-selected', 'true');
 }
 
