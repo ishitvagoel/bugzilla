@@ -184,7 +184,6 @@ function set_assign_to(use_qa_contact) {
 }
 (function(){
     'use strict';
-
     YUI.bugzilla.bugUserLastVisit = {
         update: function(bug_id) {
             var post_data = Y.JSON.stringify({
@@ -199,8 +198,10 @@ function set_assign_to(use_qa_contact) {
                             + res.responseText);
                 },
             };
+            Y.io.header('Content-Type', 'application/json');
             Y.io('jsonrpc.cgi',{
                 method: 'POST',
+                data: post_data,
                 headers: {'Content-Type': 'application/json'},
                 on: callbacks
                     
@@ -221,9 +222,11 @@ function set_assign_to(use_qa_contact) {
                                 + res.responseText);
                 },
             };
+            Y.io.header('Content-Type', 'application/json');
             Y.io('jsonrpc.cgi',{
                 method: 'POST',
-                headers: {'Content-Type': 'application/xml'},
+                data: post_data,
+                headers: {'Content-Type': 'application/json'},
                 on: callbacks
             });
         },
