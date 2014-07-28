@@ -23,11 +23,11 @@ YUI.bugzilla.commentTagging = {
     requestTemplate : function(query) {
         query = Y.Lang.trim(query);
         YUI.bugzilla.commentTagging.last_query = query;
-        YUI.bugzilla.commentTagging.counter = YAHOO.bugzilla.commentTagging.counter + 1;
+        YUI.bugzilla.commentTagging.counter = YUI.bugzilla.commentTagging.counter + 1;
         Y.io.header('Content-Type', 'application/json'); // Sets the default Header
         return Y.JSON.stringify({
             method : "Bug.search_comment_tags",
-            id : YAHOO.bugzilla.commentTagging.counter,
+            id : YUI.bugzilla.commentTagging.counter,
             params : [ { query : query, limit : 10 } ]
         });
     },
@@ -155,8 +155,8 @@ YUI.bugzilla.commentTagging = {
             // return
             e.halt();
             var tags = YUI.bugzilla.commentTagging.ctag_add.get('value').split(/[ ,]/);
-            var comment_id = YAHOO.bugzilla.commentTagging.current_id;
-            var comment_no = YAHOO.bugzilla.commentTagging.current_no;
+            var comment_id = YUI.bugzilla.commentTagging.current_id;
+            var comment_no = YUI.bugzilla.commentTagging.current_no;
             YUI.bugzilla.commentTagging.hideInput();
             try {
                 YUI.bugzilla.commentTagging.add(comment_id, comment_no, tags);
