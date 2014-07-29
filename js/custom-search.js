@@ -61,7 +61,7 @@ function custom_search_open_paren() {
 
     // find the parent any/all select, and remove the grouped option
     var structure = _cs_build_structure(row);
-    var old_id = _cs_get_row_id(row);
+    var old_id = _cs_get_row_id(row.get('id'));
     var parent_j = Y.one('#' + _cs_get_join(structure, 'f' + old_id));
     _cs_remove_and_g(parent_j);
 
@@ -87,11 +87,11 @@ function custom_search_open_paren() {
     paren_row.set('id', null);
     paren_row.set('innerHTML', '(<input type="hidden" name="f' + prev_id
                         + '" id="f' + prev_id + '" value="OP">');
-    paren_row.insertBefore(not_for_paren, paren_row.get('firstChild');
+    paren_row.insertBefore(not_for_paren, paren_row.get('firstChild'));
     row.ancestor().insertBefore(paren_row, row);
 
     // New paren set needs a new "Any/All" select.
-    var any_all_container = Y.create('div');
+    var any_all_container = Y.Node.create('<div></div>');
     any_all_container.addClass(ANY_ALL_SELECT_CLASS);
     var any_all = _cs_source_any_all.cloneNode(true);
     any_all.set('name', 'j' + prev_id);
@@ -150,13 +150,13 @@ function fix_query_string(form_member) {
     var form = form_member.ancestor('form');
     // Disable the token field so setForm doesn't include it
     var reenable_token = false;
-    if (form.get('input[name="token"]') && !form.get('input[name="token"]').get('disabled')) {
-      form.get('input[name="token"]').set('disabled', true);
+    if (form.one('input[name="token"]') && !form.one('input[name="token"]').get('disabled')) {
+      form.one('input[name="token"]').set('disabled', true);
       reenable_token = true;
     }
-    var query = Y.io.stringify(form);// To confirm Y.io.stringify(form) ??
+    var query = YAHOO.util.Connect.setForm(Y.Node.getDOMNode(form));// To confirm Y.io.stringify(form) ??
     if (reenable_token)
-      form.get('input[name="token"]').set('disabled', false);
+      form.one('input[name="token"]').set('disabled', false);
     window.History.replaceState(null, document.title, '?' + query);
 }
 
@@ -211,7 +211,7 @@ function _cs_build_structure(form_member) {
     var structure = [ 'j_top' ];
     var nested = [ structure ];
     for (var id = 1; id <= last_id; id++) {
-        var f = form.get('select[name=' + 'f' + id ']');
+        var f = form.one('select[name=f'+ id + ']');
         if (!f || !f.ancestor().ancestor()) continue;
 
         if (f.get('value') == 'OP') {
@@ -246,12 +246,12 @@ function _cs_add_listeners(parents) {
             _cs_add_listeners(parents[i]);//To test whether this works or not ?
         } else if (i == 0) {
             // joiner
-            Y.detach('change', _cs_j_change, '#' + parents[i]);
-            parents.on('change',_cs_j_change,'#' + parents[i]);
+            Y.one('#' + parents[i]).detach('change', _cs_j_change);
+            Y.one('#' + parents[i]).on('change',_cs_j_change, null, parents);
         } else {
             // field
-            Y.detach('change', _cs_f_change, '#' + parents[i]);
-            parents.on('change',_cs_f_change,'#' + parents[i]);
+            Y.one('#' + parents[i]).detach('change', _cs_f_change);
+            Y.one('#' + parents[i]).on('change',_cs_f_change, null, parents);
         }
     }
 }
@@ -290,9 +290,9 @@ function _cs_get_join(parents, field) {
 function _cs_remove_and_g(join_field) {
     var index = bz_optionIndex(join_field, 'AND_G');//bz_optionIndex migrated in util.js
     options_nodelist = join_field.get('options');
-    options_nodelist.item(index) = null;
-    options_nodelist.item(bz_optionIndex(join_field, 'AND')).get('innerHTML') = cs_and_label;
-    options_nodelist.item(bz_optionIndex(join_field, 'OR')).get('innerHTML') = cs_or_label;
+    Y.Node.getDOMNode(join_field).options[index] = null; // Y.Node.getDOMNode(options_nodelist.item(index)) = null  ??
+    options_nodelist.item(bz_optionIndex(join_field, 'AND')).set('innerHTML', cs_and_label);
+    options_nodelist.item(bz_optionIndex(join_field, 'OR')).set('innerHTML', cs_or_label);
 }
 
 function _cs_j_change(evt, fields, field) {
@@ -319,7 +319,7 @@ function _cs_j_change(evt, fields, field) {
 
 function _cs_f_change(evt, args) {
     var field = evt.target;
-    _cs_j_change(evt, args, field.value);
+    _cs_j_change(evt, args, field.get('value'));
 }
 
 function _get_last_cs_row_id() {
@@ -327,13 +327,13 @@ function _get_last_cs_row_id() {
 }   
 
 function _cs_get_row_id(row) {
-    var label = row.one('label');
+    var label = Y.one('#' + row).one('label');
     return parseInt(label.get('htmlFor').match(/\d+$/)[0]);
 }
 
 function _remove_any_all(parent) {
     var any_all = parent.all('.' + ANY_ALL_SELECT_CLASS);
-    if (any_all[0]) {
+    if (any_all.item(0)) {
         parent.removeChild(any_all.item(0));
         return any_all.item(0);
     }

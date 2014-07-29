@@ -68,7 +68,7 @@
     [%# These are alternative labels for the AND and OR options in and_all_select %]
     var cs_and_label = 'Match ALL of the following:';
     var cs_or_label  = 'Match ANY of the following:';
-    cs_reconfigure('custom_search_last_row');
+    cs_reconfigure(Y.one('#custom_search_last_row'));
   </script>
   <script type="text/javascript" src="[% 'js/history.js/native.history.js' FILTER mtime %]"></script>
 </div>
@@ -132,7 +132,7 @@
     [% ELSE %]
       <select name="f[% cond_num FILTER html %]" title="Field"
               id="f[% cond_num FILTER html %]"
-              onchange="fix_query_string(this)"
+              onchange="fix_query_string(Y.Node(this))"
               class="custom_search_form_field">
         [% FOREACH field = fields %]
           <option value="[% field.name FILTER html %]"
@@ -148,7 +148,7 @@
     
       <input name="v[% cond_num FILTER html %]" title="Value"
              class="custom_search_form_field"
-             onchange="fix_query_string(this)"
+             onchange="fix_query_string(Y.Node(this))"
              value="[% condition.v FILTER html %]">
     [% END %]
     
@@ -170,7 +170,7 @@
 [% BLOCK any_all_select %]
   <div class="any_all_select">
     <select name="[% name FILTER html %]" id="[% name FILTER html %]"
-            onchange="fix_query_string(this)">
+            onchange="fix_query_string(Y.Node(this))">
       <option value="AND">Match ALL of the following separately:</option>
       <option value="OR" [% ' selected="selected"' IF selected == "OR" %]>
         Match ANY of the following separately:</option>
