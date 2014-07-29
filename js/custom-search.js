@@ -154,7 +154,7 @@ function fix_query_string(form_member) {
       form.one('input[name="token"]').set('disabled', true);
       reenable_token = true;
     }
-    var query = YAHOO.util.Connect.setForm(Y.Node.getDOMNode(form));// To confirm Y.io.stringify(form) ??
+    var query = Y.IO.stringify(form); // YAHOO.util.Connect.setForm(Y.Node.getDOMNode(form));// To confirm Y.io.stringify(form) ??
     if (reenable_token)
       form.one('input[name="token"]').set('disabled', false);
     window.History.replaceState(null, document.title, '?' + query);
