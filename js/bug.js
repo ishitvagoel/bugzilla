@@ -192,7 +192,7 @@ function set_assign_to(use_qa_contact) {
                 params: { ids: bug_id },
             });
             var callbacks = {
-                failure: function(res) {
+                failure: function(id, res) {
                     if (console)
                         console.log("failed to update last visited: "
                             + res.responseText);
@@ -215,8 +215,8 @@ function set_assign_to(use_qa_contact) {
                 params: { },
             });
             var callbacks = {
-                success: function(res) { done(Y.JSON.parse(res.responseText)) },
-                failure: function(res) {
+                success: function(id, res) { done(Y.JSON.parse(res.responseText)) },
+                failure: function(id, res) {
                     if (console)    
                         console.log("failed to get last visited: "
                                 + res.responseText);
