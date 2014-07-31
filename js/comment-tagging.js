@@ -47,14 +47,15 @@ YUI.bugzilla.commentTagging = {
             schema: {
                 resultListLocator: "result",
                 //**************************************************
-                //resultFields: [], // Which field do we need to mention here http://www.bugzilla.org/docs/tip/en/html/api/Bugzilla/WebService/Bug.html#search_comment_tags
+                resultFields: ['result'], // Which field do we need to mention here http://www.bugzilla.org/docs/tip/en/html/api/Bugzilla/WebService/Bug.html#search_comment_tags
                 metaFields : { error: "error", jsonRpcId: "id"}
             }
         }).plug(Y.Plugin.DataSourceCache, { max: 5 });
-
+        
         var ac = new Y.AutoComplete({
             inputNode: '#bz_ctag_add',
             render: '#bz_ctag_autocomp',
+            resultListLocator: 'result',
             source: ds,
             requestTemplate: this.requestTemplate,
             maxResults: 7,
@@ -64,7 +65,7 @@ YUI.bugzilla.commentTagging = {
         ac.render();
         //*********************************************
         ac.on('results', function(query, results_array){ // is results the right event to use here in place of dataReturnEvent of YUI2 ?
-         // What is the format of the data , how to use it ? Is autoHighlight a property of the data received. ?
+         Y.log(results_array);// What is the format of the data , how to use it ? Is autoHighlight a property of the data received. ?
         });
         /*
         var ac = new YAHOO.widget.AutoComplete('bz_ctag_add', 'bz_ctag_autocomp', ds);
@@ -148,12 +149,12 @@ YUI.bugzilla.commentTagging = {
         if (evt.keyCode == 27) {
             // escape
             YUI.bugzilla.commentTagging.hideInput();
-            e.halt(); // http://yuilibrary.com/yui/docs/api/modules/event.html
+            evt.halt(); // http://yuilibrary.com/yui/docs/api/modules/event.html
             //YAHOO.util.Event.stopEvent(evt);//http://yui.github.io/yui2/docs/yui_2.9.0_full/docs/YAHOO.util.Event.html#method_stopEvent
 
         } else if (evt.keyCode == 13) {
             // return
-            e.halt();
+            evt.halt();
             var tags = YUI.bugzilla.commentTagging.ctag_add.get('value').split(/[ ,]/);
             var comment_id = YUI.bugzilla.commentTagging.current_id;
             var comment_no = YUI.bugzilla.commentTagging.current_no;
@@ -212,7 +213,7 @@ YUI.bugzilla.commentTagging = {
         if (tags.length) {
             // Can we do this: var div = Y.Node.create('<div><ul id="comment_tags_collapse_expand"></ul></div>'); ? Will then ul be a node or a DOM element ? 
             var div = Y.Node.create('<div></div>');
-            div.appendChild(Y.Node(document.createTextNode('Comment Tags:')); // How do we create a TextNode in YUI3 ?
+            div.appendChild(Y.Node(document.createTextNode('Comment Tags:'))); // How do we create a TextNode in YUI3 ?
             var ul = Y.Node.create('<ul id = "comment_tags_collapse_expand"></ul>');
             //ul.set('id', 'comment_tags_collapse_expand');  // is it required ?
             div.appendChild(ul);
@@ -227,7 +228,7 @@ YUI.bugzilla.commentTagging = {
                     YUI.bugzilla.commentTagging.toggleCollapse(tag);
                     evt.halt();
                 }, null, tag);
-                li.appendChild(Y.Node(document.createTextNode(' (' + this.nos_by_tag[tag].length + ')'));
+                li.appendChild(Y.Node(document.createTextNode(' (' + this.nos_by_tag[tag].length + ')')));
                 a.set('innerHTML', Y.Escape.html(tag));
             }
             while (container.hasChildNodes()) {
@@ -258,7 +259,7 @@ YUI.bugzilla.commentTagging = {
         el.set('id', 'ct_' + comment_no + '_' + tag);
         el.addClass('bz_comment_tag');
         if (this.can_edit) {
-            var a = Y.Node.create('<a><a>');
+            var a = Y.Node.create('<a></a>');
             a.set('href', '#');
             a.on('click', function(evt, args) {
                 YUI.bugzilla.commentTagging.remove(args[0], args[1], args[2])
@@ -345,7 +346,7 @@ YUI.bugzilla.commentTagging = {
             }),
             headers: {'Content-Type': 'application/json'},
             on: {
-                success: function(res) {
+                success: function(id, res) {
                     YUI.bugzilla.commentTagging.decPending(comment_id);
                     data = Y.JSON.parse(res.responseText);
                     if (data.error) {
@@ -357,8 +358,9 @@ YUI.bugzilla.commentTagging = {
                     if (!YUI.bugzilla.commentTagging.hasPending(comment_id))
                         YUI.bugzilla.commentTagging.showTags(
                             comment_id, comment_no, data.result.comments[comment_id].tags);
+                    }
                 },
-                failure: function(res) {
+                failure: function(id, res) {
                     YUI.bugzilla.commentTagging.decPending(comment_id);
                     YUI.bugzilla.commentTagging.handleRpcError(
                         comment_id, comment_no, res.responseText, noRefreshOnError);
@@ -383,7 +385,7 @@ YUI.bugzilla.commentTagging = {
             }),
             headers: {'Content-Type': 'application/json'},
             on: {
-                success: function(res) { //To confirm whether the res object has been used correctly ?
+                success: function(id, res) {
                     YUI.bugzilla.commentTagging.decPending(comment_id);
                     data = Y.JSON.parse(res.responseText);
                     if (data.error) {
@@ -393,9 +395,10 @@ YUI.bugzilla.commentTagging = {
 
                     if (!YUI.bugzilla.commentTagging.hasPending(comment_id))
                         YUI.bugzilla.commentTagging.showTags(comment_id, comment_no, data.result);
+                    }
                 },
             
-                failure: function(res) {
+                failure: function(id, res) {
                     YUI.bugzilla.commentTagging.decPending(comment_id);
                     YUI.bugzilla.commentTagging.handleRpcError(comment_id, comment_no, res.responseText);
                 }
