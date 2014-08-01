@@ -142,6 +142,9 @@ use constant WS_ERROR_CODE => {
     extern_id_conflict           => -303,
     auth_failure                 => 304,
     password_current_too_short   => 305,
+    api_key_not_valid            => 306,
+    api_key_revoked              => 306,
+    auth_invalid_token           => 307,
 
     # Except, historically, AUTH_NODATA, which is 410.
     login_required               => 410,
@@ -246,6 +249,7 @@ use constant REST_STATUS_CODE_MAP => {
     410      => STATUS_NOT_AUTHORIZED,
     504      => STATUS_NOT_AUTHORIZED,
     505      => STATUS_NOT_AUTHORIZED,
+    32614    => STATUS_NOT_FOUND,
     _default => STATUS_BAD_REQUEST
 };
 
