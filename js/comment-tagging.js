@@ -28,7 +28,11 @@ YUI.bugzilla.commentTagging = {
         return Y.JSON.stringify({
             method : "Bug.search_comment_tags",
             id : YUI.bugzilla.commentTagging.counter,
-            params : [ { query : query, limit : 10 } ]
+            params : {
+                    Bugzilla_api_token: BUGZILLA.api_token,
+                    query : query,
+                    limit : 10
+                }
         });
     },
 

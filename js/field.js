@@ -1121,7 +1121,7 @@ function show_comment_preview(bug_id) {
         params: {
             Bugzilla_api_token: BUGZILLA.api_token,
             id: bug_id,
-            text: comment.value
+            text: comment.get('value')
         }
     });
     Y.io('jsonrpc.cgi',{
