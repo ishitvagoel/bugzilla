@@ -18,10 +18,10 @@ function validateEnterBug(theform) {
         return true;
     }
 
-    var component = theform.component;// node not needed
-    var short_desc = theform.short_desc;// node not needed
-    var version = theform.version;// node not needed
-    var bug_status = theform.bug_status;// node not needed
+    var component = theform.component;
+    var short_desc = theform.short_desc;
+    var version = theform.version;
+    var bug_status = theform.bug_status;
     var description = theform.comment;
     var attach_data = theform.data;
     var attach_desc = theform.description;
@@ -41,7 +41,7 @@ function validateEnterBug(theform) {
 
     // These are checked in the reverse order that they appear on the page,
     // so that the one closest to the top of the form will be focused.
-    if (attach_data.value && Y.Lang.trim(attach_desc.value == '') {
+    if (attach_data.value && Y.Lang.trim(attach_desc.value) == '') {
         _errorFor(attach_desc, 'attach_desc');
         focus_me = attach_desc;
     }
@@ -117,9 +117,9 @@ function showCalendar(field_name) {
     // Because of the way removeListener works, this has to be a function
     // attached directly to this calendar.
     calendar.bz_myBodyCloser = function(event) {
-        var container = this.get('contentBox'); // To confirm
+        var container = this.get('contentBox');
         var target    = event.target;//To confirm if target is a YUI node or not.
-        if (target != container && target != button
+        if (target != container && Y.Node.getDOMNode(target) != button
             && !container.contains(target))
         {
             hideCalendar(field_name);
@@ -153,7 +153,7 @@ function hideCalendar(field_name) {
 /* This is the selectEvent for our Calendar objects on our custom 
  * DateTime fields.
  */
-function setFieldFromCalendar(ev,data_field) {//How do we pass the parameters data_field ?
+function setFieldFromCalendar(ev,data_field) {
     var dates = ev.newSelection[0];
 
     // We can't just write the date straight into the field, because there 
@@ -198,7 +198,7 @@ function updateCalendarFromField(date_field) {
     var dateRe = /(\d\d\d\d)-(\d\d?)-(\d\d?)/;
     var pieces = dateRe.exec(date_field.value);
     if (pieces) {
-        var cal = YAHOO.bugzilla["calendar_" + date_field.id];
+        var cal = YUI.bugzilla["calendar_" + date_field.id];
         cal.selectDates(new Date(pieces[1], pieces[2] - 1, pieces[3]));
         var selectedArray = cal.get('selectedDates');
         var selected = selectedArray[0];
@@ -263,7 +263,7 @@ function showEditableField (e, ContainerInputArray) {
             } else {
                 for (var i = 0; inputs[0].size(); i++) {
                     if ( inputs[0].get('options').item(i).get('value') == ContainerInputArray[3] ) { //To confirm the access of options NodeList here.
-                        inputs[0].get('options')item(i).set('selected', true);
+                        inputs[0].get('options').item(i).set('selected', true);
                         break;
                     }
                 }
@@ -333,7 +333,7 @@ function showPeopleOnChange( field_id_list ) {
         Y.one('#' + field_id_list[i]).on('change', showEditableField, null,
                                       new Array('bz_qa_contact_edit_container',
                                                 'bz_qa_contact_input'));
-        Y.one('#' + field_id_list[i]).on('change',showEditableField, null
+        Y.one('#' + field_id_list[i]).on('change',showEditableField, null,
                                       new Array('bz_assignee_edit_container',
                                                 'bz_assignee_input'));
     }
@@ -465,7 +465,7 @@ function boldOnChange(e, field_id){
     }
 }
 
-function updateCommentTagControl(checkbox, field) { // Need to correct in comments.html.tmpl
+function updateCommentTagControl(checkbox, field) {
     if (checkbox.checked) {
         Y.one('#field').addClass('bz_private');
     } else {
@@ -829,18 +829,23 @@ YUI.bugzilla.userAutocomplete = {
       return stringified;
     },
     resultListFormat : function(query, results) {
-        return (results.real_name.display + " (" + results.name.display + ")");// To confirm the usage of results object. The display attirbute contains the HTML escaped values.
+        //********************************************
+        return Y.Array.map(results, function(result){
+            return (result.real_name.display + " (" + result.name.display + ")");
+        });
+        // To confirm the usage of results object. The display attirbute contains the HTML escaped values.
 
         //return ( YAHOO.lang.escapeHTML(oResultData.real_name) + " ("
           //       + YAHOO.lang.escapeHTML(oResultData.name) + ")");
-    },
-    debug_helper : function ( evt ){
-        /* used to help debug any errors that might happen */
+    },  
+    /*debug_helper : function ( evt ){
+        //used to help debug any errors that might happen
         if( typeof(console) !== 'undefined' && console != null && arguments.length > 0 ){
             console.log("debug helper info:", arguments);
         }
         return true;
-    },  
+    },
+    */
     init_ds : function(){
         var new_ds = new Y.DataSource.IO({
             source: "jsonrpc.cgi"
@@ -885,15 +890,12 @@ YUI.bugzilla.userAutocomplete = {
             resultFormatter: this.resultListFormat,
             maxResults: BUGZILLA.param.maxusermatches,
             minQueryLength: 3,
-            queryDelay: 0.05,
-            //What about the useIFrame , autoHighlight and resultTypeList properties ?
-
+            queryDelay: 0.05
         });
         if( multiple == true ){
             userAutoComp.set('queryDelimiter', ',');
         }
         userAutoComp.render();
-        userAutoComp.on('results', debug_helper); // To confirm as an alternative to doBeforeLoadData function of YUI3.
         /*
         var userAutoComp = new YAHOO.widget.AutoComplete( field, container, 
                                 this.dataSource );
@@ -916,11 +918,11 @@ YUI.bugzilla.userAutocomplete = {
     }
 };
 
-YAHOO.bugzilla.fieldAutocomplete = {
+YUI.bugzilla.fieldAutocomplete = {
     dataSource : [],
     init_ds : function( field ) {
         this.dataSource[field] =
-          new Y.DataSource.Local( { source: YAHOO.bugzilla.field_array[field] } );
+          new Y.DataSource.Local( { source: YUI.bugzilla.field_array[field] } );
           //new YAHOO.util.LocalDataSource( YAHOO.bugzilla.field_array[field] );
     },
     init : function( field, container ) {
@@ -932,11 +934,15 @@ YAHOO.bugzilla.fieldAutocomplete = {
             inputNode: field,
             render: container,
             source: this.dataSource[field],
-            maxResults: YAHOO.bugzilla.field_array[field].length,
-            //resultFormatter: To ask about the formatEscapedResult function.
-            //What about the useIFrame , autoHighlight and resultTypeList properties ?
+            maxResults: YUI.bugzilla.field_array[field].length,
+            resultFormatter: function(query, results){
+                return Y.Array.map(results, function(result){
+                    return result.display;// For HTML escaped values.
+                });
+            },
+    
             minQueryLength: 0,
-            queryDelimiter: [","," "], // Are we allowed to use the array of delimiters in YUI 3?
+            queryDelimiter: ',', //[","," "], // Are we allowed to use the array of delimiters in YUI 3?
             queryDelay: 0,
           });
          fieldAutoComp.render(); 
@@ -952,19 +958,35 @@ YAHOO.bugzilla.fieldAutocomplete = {
         
         */
         /*  Causes all the possibilities in the field to appear when a user
-         *  focuses on the textbox 
+         *  focuses on the textbox
          */
-        fieldAutoComp.textboxFocusEvent.subscribe( function(){
+        //*********************************
+        //Commentec out
+        /*
+        fieldAutoComp.on('focusedChange', function(){
+            var sInputValue = Y.one('#' + field).get('value');
+            if( sInputValue.length === 0
+                && YUI.bugzilla.field_array[field].length > 0 ){
+                this.sendRequest(sInputValue);
+                this.disable(); // or visible attribute ? 
+                this.enable();
+            }
+        });
+        */
+        /*
+        fieldAutoComp.textboxFocusEvent.subscribe( function(){ // http://yuilibrary.com/yui/docs/api/classes/AutoCompleteList.html , focused attribute. ?
             var sInputValue = YAHOO.util.Dom.get(field).value;
             if( sInputValue.length === 0
                 && YAHOO.bugzilla.field_array[field].length > 0 ){
-                this.sendQuery(sInputValue);
-                this.collapseContainer();
-                this.expandContainer();
+                this.sendQuery(sInputValue); // http://yuilibrary.com/yui/docs/api/classes/Plugin.AutoComplete.html#method_sendRequest
+                this.collapseContainer(); // http://yuilibrary.com/yui/docs/api/classes/Plugin.AutoComplete.html#attr_disabled ?
+                this.expandContainer(); // http://yuilibrary.com/yui/docs/api/classes/Plugin.AutoComplete.html#method_enable ?
             }
         });
+        */
+        //**********************************
         fieldAutoComp.dataRequestEvent.subscribe( function(type, args) {
-            args[0].autoHighlight = args[1] != '';
+            args[0].autoHighlight = args[1] != ''; // Need help understanding what this code does ?
         });
     }
 };
@@ -1068,7 +1090,7 @@ function show_comment_preview(bug_id) {
 
     Y.io.header('Content-Type', 'application/json');
     var callbacks = {
-        success: function(res) {
+        success: function(res) { // To confirm whether the res object has been used correctly in the function ?
             data = Y.JSON.parse(res.responseText);
             if (data.error) {
                 Y.one('#comment_preview_loading').addClass('bz_default_hidden');
