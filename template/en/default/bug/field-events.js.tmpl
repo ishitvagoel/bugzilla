@@ -55,5 +55,5 @@
   [% END %]
 [% END %]
 [% IF field.name == 'classification' %]
-  YAHOO.util.Event.on('product', 'change', setClassification);
+  Y.one('#product').on('change', setClassification);//To Confirm
 [% END %]

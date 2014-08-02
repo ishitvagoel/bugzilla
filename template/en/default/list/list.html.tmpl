@@ -114,8 +114,7 @@
 [%# Show the link if the browser supports JS %]
 <script type="text/javascript">
   TUI_alternates['search_description'] = 'Show Search Description';
-  YAHOO.util.Dom.removeClass('search_description_controller', 
-                             'bz_default_hidden');
+  Y.one('#search_description_controller').removeClass('bz_default_hidden');
 </script>
 
 <ul class="search_description">

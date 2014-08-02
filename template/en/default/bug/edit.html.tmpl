@@ -905,18 +905,14 @@
             (<a href="#" id="bz_flags_more_action">[% IF !bug_flags_set %]set[% ELSE %]more[% END %] flags</a>)
           </span>
           <script type="text/javascript">
-            YAHOO.util.Dom.removeClass('bz_flags_more_container', 'bz_default_hidden');
-            var table = YAHOO.util.Dom.get("flags");
-            var rows = YAHOO.util.Dom.getElementsByClassName('bz_flag_type', 'tbody', table);
-            for (var i = 0; i < rows.length; i++) {
-                YAHOO.util.Dom.addClass(rows[i], 'bz_default_hidden');
-            }
-            YAHOO.util.Event.addListener('bz_flags_more_action', 'click', function (e) {
-                YAHOO.util.Dom.addClass('bz_flags_more_container', 'bz_default_hidden');
-                for (var i = 0; i < rows.length; i++) {
-                    YAHOO.util.Dom.removeClass(rows[i], 'bz_default_hidden');
-                }
-                YAHOO.util.Event.preventDefault(e);
+            Y.one('#bz_flags_more_container').removeClass('bz_default_hidden');
+            var table = Y.one('#flags');
+            var rows = table.all('tbody .bz_flag_type'); // To test
+            rows.addClass('bz_default_hidden');
+            Y.one('#bz_flags_more_action').on('click', function (e) {
+                Y.one('#bz_flags_more_container').addClass('bz_default_hidden');
+                rows.removeClass('bz_default_hidden');
+                e.preventDefault();
             }); 
           </script>
         [% END %]

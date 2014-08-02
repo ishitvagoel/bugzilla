@@ -16,13 +16,13 @@
   <script type="text/javascript"><!--
     function update_checkbox(group) {
       var bless_groups = [[% bless_group_ids.join(",") FILTER js %]];
-      var checkbox = document.getElementById(group.name.replace(/share_(\d+)/, "force_$1"));
+      var checkbox = Y.one('#' + group.name.replace(/share_(\d+)/, "force_$1"));
 
       if (bz_isValueInArray(bless_groups, group.value)) {
-        YAHOO.util.Dom.removeClass(checkbox.parentNode, "bz_default_hidden");
+        checkbox.ancestor().removeClass("bz_default_hidden");
       } else {
-        YAHOO.util.Dom.addClass(checkbox.parentNode, "bz_default_hidden");
-        checkbox.checked = false;
+        checkbox.ancestor().addClass("bz_default_hidden");
+        checkbox.set('checked', false);
       }
     } //-->
   </script>

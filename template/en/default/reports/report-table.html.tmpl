@@ -40,45 +40,49 @@ function bz_encode (str, decode) {
   return encodeURIComponent(str).replace(/'/g, escape);
 };
 
-YAHOO.util.Event.addListener(window, "load", function() {
-  this.Linkify = function(elLiner, oRecord, oColumn, oData) {
-    if (oData == 0)
-      elLiner.innerHTML = ".";
-    else if (oRecord.getData("row_title") == "Total")
-      elLiner.innerHTML = '<a href="[% urlbase FILTER js %]&amp;[% col_field FILTER uri FILTER js %]='
-                          + bz_encode(oColumn.field)
-                          + '[% "&amp;" _ row_vals IF row_vals %]">' + oData + '</a>';
+Y.on("load", function() {
+  this.Linkify = function(elLiner) {
+    if (elLiner.value == 0)
+      elLiner.value = ".";
+    else if (elLiner.data.row_title == "Total") // Is this correct ? https://yuilibrary.com/yui/docs/datatable/#formatter-props
+      elLiner.value = '<a href="[% urlbase FILTER js %]&amp;[% col_field FILTER uri FILTER js %]='
+                          + bz_encode(elLiner.column.key) // is this correct for oColumn.field ?
+                          + '[% "&amp;" _ row_vals IF row_vals %]">' + elLiner.value + '</a>';
     else
-      elLiner.innerHTML = '<a href="[% urlbase FILTER js %]&amp;[% row_field FILTER uri FILTER js %]='
-                          + bz_encode(oRecord.getData("row_title"), 1)
+      elLiner.value = '<a href="[% urlbase FILTER js %]&amp;[% row_field FILTER uri FILTER js %]='
+                          + bz_encode(elLiner.data.row_title, 1)
                           + '&amp;[% col_field FILTER uri FILTER js %]='
-                          + bz_encode(oColumn.field) + '">' + oData + '</a>';
+                          + bz_encode(elLiner.column.key) + '">' + elLiner.value + '</a>';
   };
 
-  this.LinkifyTotal = function(elLiner, oRecord, oColumn, oData) {
-    if (oData == 0)
-      elLiner.innerHTML = ".";
-    else if (oRecord.getData("row_title") == "Total")
-      elLiner.innerHTML = '<a href="[% urlbase FILTER js %][% "&amp;" _ row_vals IF row_vals %]
+  this.LinkifyTotal = function(elLiner) {
+    if (elLiner.value == 0) // Is it correct ?
+      elLiner.value = ".";
+    else if (elLiner.data.row_title == "Total")
+      elLiner.value = '<a href="[% urlbase FILTER js %][% "&amp;" _ row_vals IF row_vals %]
                           [%~ "&amp;" _ col_vals IF col_vals %]">'
-                          + oData + '</a>';
+                          + elLiner.value + '</a>';
     else
-      elLiner.innerHTML = '<a href="[% urlbase FILTER js %]&amp;[% row_field FILTER uri FILTER js %]='
-                          + bz_encode(oRecord.getData("row_title"), 1)
-                          + '[% "&amp;" _ col_vals IF col_vals %]">' + oData + '</a>';
+      elLiner.value = '<a href="[% urlbase FILTER js %]&amp;[% row_field FILTER uri FILTER js %]='
+                          + bz_encode(elLiner.data.row_title, 1)
+                          + '[% "&amp;" _ col_vals IF col_vals %]">' + elLiner.value + '</a>';
 
-    YAHOO.util.Dom.addClass(elLiner.parentNode, "ttotal");
+    elLiner.cell.ancestor().addClass("ttotal");
   };
-
-  var totalRowFormatter = function( elTr, oRecord ) {
-      if ( oRecord.getData('row_title') == "Total" ) {
-          YAHOO.util.Dom.addClass( elTr, 'ttotal' );
+//To confirm
+  var totalRowFormatter = function( elTr) {
+      if ( elTr.record.get("row_title") == "Total" ) {
+          elTr.cell.addClass( 'ttotal' );
       }
       return true;
   };
 
-  var totalNumberSorter = function( a, b, desc, field ){
-    var a_value = a.getData(field);
+  var totalNumberSorter = function( a, b, desc, field ){ // What to do with the field parameter in YUI3 ? The sortFn only accepts the first three. 
+   // http://yuilibrary.com/yui/docs/api/classes/YUI.html#method_rbind ??
+   // Y.rbind(genericSortFunction,this,'fieldName');
+   //generic sort function will be defined as genericSortFunction(modelA,modelB,desc,fieldName(;
+    //var a_field = a.get('key');
+    var a_value = a.getData(field); //To do 
     var b_value = b.getData(field);
     var a_total_test = a.getData("row_title");
     var b_total_test = b.getData("row_title");
@@ -90,17 +94,32 @@ YAHOO.util.Event.addListener(window, "load", function() {
     }
     return comp_result;
   };
-
-
+  
+  var myColumnDefs = [
+        {key:"row_title", label:"", sortable:true,
+         sortFn:totalNumberSorter
+        },
+        [% FOREACH col = col_names %]
+          {key:"[% col FILTER js %]", label:"[% display_value(col_field, col) FILTER html FILTER js %]", allowHTML: true, sortable:true,
+           formatter:this.Linkify, // Do we need to define the defaultDir in YUI3 as well ?
+           sortFn:totalNumberSorter
+         },
+        [% END %]
+        {key:"total", label:"Total", allowHTML: true, sortable:true, formatter:this.LinkifyTotal,
+          sortFn: totalNumberSorter
+        }
+      ];
+/*
   var myColumnDefs = [
         {key:"row_title", label:"", sortable:true, sortOptions: { sortFunction:totalNumberSorter }},
         [% FOREACH col = col_names %]
           {key:"[% col FILTER js %]", label:"[% display_value(col_field, col) FILTER html FILTER js %]", sortable:true,
-           formatter:this.Linkify, sortOptions: { defaultDir: YAHOO.widget.DataTable.CLASS_DESC, sortFunction:totalNumberSorter }},
+           formatter:this.Linkify, sortOptions: { defaultDir: YAHOO.widget.DataTable.CLASS_DESC, sortFunction:totalNallowHTML: true,allowHTML: true,umberSorter }},
         [% END %]
         {key:"total", label:"Total", sortable:true, formatter:this.LinkifyTotal,
-         sortOptions: { defaultDir: YAHOO.widget.DataTable.CLASS_DESC, sortFunction:totalNumberSorter }}
+         sortOptions: { defaultDir: YAHOO.widget.DataTable.CLASS_DESC, sortFuncti:totalNumberSorter }}
       ];
+*/      
   this.parseString = function(str) {
     return YAHOO.lang.trim(str);
   };
@@ -115,10 +134,27 @@ YAHOO.util.Event.addListener(window, "load", function() {
     if (res && res[1])
       return parseFloat(res[1]);
   };
+// The following has been don as per. https://yuilibrary.com/yui/docs/datasource/datasource-local.html
+  var table = Y.Node.getDOMNode(Y.one("#tabular_report_[% tbl FILTER html FILTER js %]"));
+  this.myDataSource = new Y.DataSource.Local({source:table});
+  //this.myDataSource.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
+  this.myDataSource.plug(Y.Plugin.DataSourceXMLSchema, {
+    schema: {
+      resultListLocator: "tr",
+      //How do we mention the locators for the fields here ?
+      resultFields: [
+          {key:"row_title", parser:this.parseString}, // Can we use formatter instead of parser ?
+          [% FOREACH col = col_names %]
+            {key:"[% col FILTER js %]", parser:this.parseNumber},
+          [% END %]
+          {key:"total", parser:this.parseNumber}
+      ]
+    }
+  });
 
-  this.myDataSource = new YAHOO.util.DataSource(YAHOO.util.Dom.get("tabular_report_[% tbl FILTER html FILTER js %]"));
-  this.myDataSource.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
-  this.myDataSource.responseSchema = {
+  myDataSource.sendRequest();// any config options needed ?
+
+  /* = {
     fields: [
       {key:"row_title", parser:this.parseString},
       [% FOREACH col = col_names %]
@@ -127,6 +163,10 @@ YAHOO.util.Event.addListener(window, "load", function() {
       {key:"total", parser:this.parseNumber}
     ]
   };
+  */ 
+  this.myDataTable = new Y.DataTable({
+    
+  });
   this.myDataTable = new YAHOO.widget.DataTable("tabular_report_container_
                          [% tbl FILTER js %]", myColumnDefs, this.myDataSource, 
                          {formatRow: totalRowFormatter});

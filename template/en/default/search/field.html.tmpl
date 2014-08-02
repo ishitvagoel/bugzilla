@@ -43,13 +43,13 @@
        <div id="[% field.name FILTER html %]_autocomplete"></div>
     </div>
     <script type="text/javascript" defer="defer">
-      if (typeof YAHOO.bugzilla.field_array === "undefined")
-        YAHOO.bugzilla.field_array = [];
-      YAHOO.bugzilla.field_array["[% field.name FILTER js %]"] = [
+      if (typeof YUI.bugzilla.field_array === "undefined")
+        YUI.bugzilla.field_array = [];
+      YUI.bugzilla.field_array["[% field.name FILTER js %]"] = [
         [%- FOREACH val = possible_values %]
           [%-# %]"[% val FILTER js %]"
           [%- "," IF NOT loop.last %][% END %]];
-      YAHOO.bugzilla.fieldAutocomplete.init('[% field.name FILTER js %]',
+      YUI.bugzilla.fieldAutocomplete.init('[% field.name FILTER js %]',
                                             '[% field.name FILTER js %]_autocomplete');
     </script>
   [% CASE [constants.FIELD_TYPE_DATETIME, constants.FIELD_TYPE_DATE] %]
@@ -152,7 +152,7 @@
     # "change" event once the page has loaded, so we can set all
     # the values in all the other <select>s properly.
     #%]
-  YAHOO.util.Event.onDOMReady(function() {
+  Y.on('domready', function() {
       var field = document.getElementById('[% field.name FILTER js %]');
       if (field.selectedIndex != -1) bz_fireEvent(field, 'change');
   });

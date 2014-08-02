@@ -91,9 +91,9 @@
     <div id="[% id FILTER html %]_autocomplete_container"></div>
     </div>  
     <script type="text/javascript">
-      if( typeof(YAHOO.bugzilla.userAutocomplete) !== 'undefined' 
-          && YAHOO.bugzilla.userAutocomplete != null){
-        YAHOO.bugzilla.userAutocomplete.init( "[% id FILTER js %]", 
+      if( typeof(YUI.bugzilla.userAutocomplete) !== 'undefined' 
+          && YUI.bugzilla.userAutocomplete != null){
+        YUI.bugzilla.userAutocomplete.init( "[% id FILTER js %]", 
                     "[% id FILTER js %]_autocomplete_container"
                     [% IF multiple %], true[% END%]);        
       }

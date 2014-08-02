@@ -61,21 +61,19 @@
       '[% status.name FILTER js %]'[% ',' UNLESS loop.last %]
     [% END %]
   ];
-  YAHOO.util.Dom.removeClass('dup_id_discoverable', 'bz_default_hidden');
+  Y.one('#dup_id_discoverable').removeClass('bz_default_hidden');
   hideEditableField( "dup_id_container", "dup_id", 'dup_id_edit_action',
                      'dup_id', '[% bug.dup_id FILTER js %]' )
   showHideStatusItems( "",  ['[% "is_duplicate" IF bug.dup_id %]',
                              '[% bug.bug_status FILTER js %]']);
-  YAHOO.util.Event.addListener( 'bug_status', "change", showHideStatusItems,
+  Y.one('#bug_status').on("change", showHideStatusItems, null, // To confirm if bug_status is an ID ?
                                 ['[% "is_duplicate" IF bug.dup_id %]',
                                  '[% bug.bug_status FILTER js %]']);
-  YAHOO.util.Event.addListener( 'resolution', "change", showDuplicateItem);
-  YAHOO.util.Event.addListener( 'dup_id_discoverable_action',
-                                'click',
-                                setResolutionToDuplicate,
+  Y.one('#resolution').on("change", showDuplicateItem);
+  Y.one('#dup_id_discoverable_action').on('click', setResolutionToDuplicate, null,
                                 '[% Param('duplicate_or_move_bug_status')
                                                                 FILTER js %]');
-  YAHOO.util.Event.addListener( window, 'load',  showHideStatusItems,
+  Y.on('load', showHideStatusItems, null, // Is Y.Node(window) correct ? or Y.on('load',....) will suffice ?
                               ['[% "is_duplicate" IF bug.dup_id %]',
                                '[% bug.bug_status FILTER js %]'] );
 

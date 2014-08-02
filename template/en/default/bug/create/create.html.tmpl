@@ -487,7 +487,7 @@ TUI_hide_default('attachment_text_field');
                 allowHTML : true },
               { key: "summary", 
                 label: "[% field_descs.short_desc FILTER js %]",
-                 },
+                 }, // Do we need any formatter here ?
               { key: "status",
                 label: "[% field_descs.bug_status FILTER js %]",
                 formatter: YUI.bugzilla.dupTable.formatStatus },

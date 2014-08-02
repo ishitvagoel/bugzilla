@@ -27,8 +27,8 @@
           }
       }
   }
-  YAHOO.util.Dom.removeClass("check_all", "bz_default_hidden");
-  YAHOO.util.Dom.removeClass("uncheck_all", "bz_default_hidden");
+  Y.one('#check_all').removeClass("bz_default_hidden");
+  Y.one('#uncheck_all').removeClass("bz_default_hidden");
 </script>
 
 <hr>
@@ -441,8 +441,8 @@
 
   <script type="text/javascript">
   var close_status_array = new Array("[% closed_status_array.join('", "') FILTER none %]");
-    YAHOO.util.Event.addListener('bug_status', "change", showHideStatusItems, '[% "is_duplicate" IF bug.dup_id %]');
-    YAHOO.util.Event.onDOMReady( showHideStatusItems );
+    Y.one('#bug_status').on("change", showHideStatusItems, null, '[% "is_duplicate" IF bug.dup_id %]');
+    Y.on( 'domready', showHideStatusItems );
   </script>
 
 [% END %]

@@ -11,19 +11,16 @@
 <script type="text/javascript">
 <!--
 function toggle_display(link) {
-    var table = document.getElementById("attachment_table");
+    var table = Y.one("#attachment_table");
     var view_all = document.getElementById("view_all");
     var hide_obsolete_url_parameter = "&hide_obsolete=1";
     // Store current height for scrolling later
-    var originalHeight = table.offsetHeight;
-    var rows = YAHOO.util.Dom.getElementsByClassName(
-        'bz_tr_obsolete', 'tr', table);
+    var originalHeight = table.get('offsetHeight');
+    var rows = table.all('tr .bz_tr_obsolete'); // To check https://yuilibrary.com/yui/docs/api/classes/NodeList.html#method_toggleClass
 
-    for (var i = 0; i < rows.length; i++) {
-        bz_toggleClass(rows[i], 'bz_default_hidden');
-    }
+    rows.toggleClass('bz_default_hidden'); //To check.
 
-    if (YAHOO.util.Dom.hasClass(rows[0], 'bz_default_hidden')) {
+    if (rows.item(0).hasClass('bz_default_hidden')) {
         link.innerHTML = "Show Obsolete";
         view_all.href = view_all.href + hide_obsolete_url_parameter 
     }
@@ -32,7 +29,7 @@ function toggle_display(link) {
         view_all.href = view_all.href.replace(hide_obsolete_url_parameter,"");
     }
 
-    var newHeight = table.offsetHeight;
+    var newHeight = table.get('offsetHeight');
     // This scrolling makes the window appear to not move at all.
     window.scrollBy(0, newHeight - originalHeight);
 
