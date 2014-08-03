@@ -275,8 +275,9 @@ function bz_preselectedOptions(aSelect) {
  * @param aValue        The value you want to know the index of.
  */
 function bz_optionIndex(aSelect, aValue) {
-    for (var i = 0; i < aSelect.get('options').size(); i++) {
-        if (aSelect.get('options').item(i).get('value') == aValue) {
+    var options_nodelist = aSelect.get('options');
+    for (var i = 0; i < options_nodelist.size(); i++) {
+        if (options_nodelist.item(i).get('value') == aValue) {
             return i;
         }
     }
