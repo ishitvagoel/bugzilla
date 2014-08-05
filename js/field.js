@@ -94,7 +94,9 @@ function createCalendar(name, start_weekday, months_long, weekdays_short) {
         showNextMonth: true,
         date: new Date()    
     });
+    if(start_weekday)//For testing ; sometimes this option is undefined.
     cal.set('strings.first_weekday', start_weekday); // as per http://yuilibrary.com/forum-archive/forum/viewtopic.php@p=30610.html
+    if(weekdays_short)
     cal.set('strings.very_short_weekdays', weekdays_short);
     YUI.bugzilla['calendar_' + name] = cal;
     var field = document.getElementById(name);
@@ -107,10 +109,11 @@ function createCalendar(name, start_weekday, months_long, weekdays_short) {
 function showCalendar(field_name) {
     var calendar  = YUI.bugzilla["calendar_" + field_name];
     var field     = document.getElementById(field_name);
+    var button = Y.one('#button_calendar_' + field_name);
     var calendar_container = calendar.get('contentBox').getDOMNode();
     bz_overlayBelow(calendar_container, field);
     calendar.show();
-    Y.one('#button_calendar_' + field_name).on('click', function() { 
+    button.on('click', function() { 
         hideCalendar(field_name);
     });
 
@@ -119,7 +122,7 @@ function showCalendar(field_name) {
     calendar.bz_myBodyCloser = function(event) {
         var container = this.get('contentBox');
         var target    = event.target;//To confirm if target is a YUI node or not.
-        if (target != container && Y.Node.getDOMNode(target) != button
+        if (target != container && target != button
             && !container.contains(target))
         {
             hideCalendar(field_name);
@@ -159,7 +162,7 @@ function setFieldFromCalendar(ev,data_field) {
     // We can't just write the date straight into the field, because there 
     // might already be a time there.
     var timeRe = /\b(\d{1,2}):(\d\d)(?::(\d\d))?/;
-    var currentTime = timeRe.exec(date_field.values);
+    var currentTime = timeRe.exec(date_field.value);
     var d = Y.Date.parse(dates);
     if (currentTime) {
         d.setHours(currentTime[1], currentTime[2]);
@@ -849,7 +852,8 @@ YUI.bugzilla.userAutocomplete = {
     */
     init_ds : function(){
         var new_ds = new Y.DataSource.IO({
-            source: "jsonrpc.cgi"
+            source: "jsonrpc.cgi", ioConfig: { method: "POST",
+              headers: {'Content-Type': 'application/json'} }
         });
         new_ds.plug(Y.Plugin.DataSourceJSONSchema, {
             schema: {
@@ -986,9 +990,10 @@ YUI.bugzilla.fieldAutocomplete = {
         });
         */
         //**********************************
-        fieldAutoComp.dataRequestEvent.subscribe( function(type, args) {
+        /*fieldAutoComp.dataRequestEvent.subscribe( function(type, args) {
             args[0].autoHighlight = args[1] != ''; // Need help understanding what this code does ?
         });
+        */
     }
 };
 
@@ -1091,7 +1096,7 @@ function show_comment_preview(bug_id) {
 
     Y.io.header('Content-Type', 'application/json');
     var callbacks = {
-        success: function(res) { // To confirm whether the res object has been used correctly in the function ?
+        success: function(id, res) { // To confirm whether the res object has been used correctly in the function ?
             data = Y.JSON.parse(res.responseText);
             if (data.error) {
                 Y.one('#comment_preview_loading').addClass('bz_default_hidden');
@@ -1107,7 +1112,7 @@ function show_comment_preview(bug_id) {
                 last_comment_text = comment.get('value');
             }
         },
-        failure: function(res) {
+        failure: function(id, res) {
             Y.one('#comment_preview_loading').addClass('bz_default_hidden');
             var comment_preview_error = Y.one('#comment_preview_error');
             comment_preview_error.removeClass('bz_default_hidden');
