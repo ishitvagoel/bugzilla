@@ -29,7 +29,7 @@ YUI.bugzilla.commentTagging = {
             method : "Bug.search_comment_tags",
             id : YUI.bugzilla.commentTagging.counter,
             params : {
-                    Bugzilla_api_token: BUGZILLA.api_token,
+                    //Bugzilla_api_token: BUGZILLA.api_token,
                     query : query,
                     limit : 10
                 }
@@ -46,7 +46,9 @@ YUI.bugzilla.commentTagging = {
         });
         if (!can_edit) return;
 
-        var ds = new Y.DataSource.IO({ source: "jsonrpc.cgi" });
+        var ds = new Y.DataSource.IO({ source: "jsonrpc.cgi" , ioConfig: { method: "POST",
+              headers: {'Content-Type': 'application/json'}
+         }});
         ds.plug(Y.Plugin.DataSourceJSONSchema, {
             schema: {
                 resultListLocator: "result",
@@ -55,20 +57,43 @@ YUI.bugzilla.commentTagging = {
                 metaFields : { error: "error", jsonRpcId: "id"}
             }
         }).plug(Y.Plugin.DataSourceCache, { max: 5 });
-        
+        /* The following executes but there is an error stating that Parameters are wrong for JSONRPC
+            
+        ds.sendRequest({
+            request: Y.JSON.stringify({
+            method : "Bug.search_comment_tags",
+            id : YUI.bugzilla.commentTagging.counter,
+            params : {
+                    Bugzilla_api_token: BUGZILLA.api_token,
+                    query : 'aaaa',
+                    limit : 10
+                }
+            }),
+            on: {
+                success : function(e){Y.log(e);},
+                failure : function(e){Y.log(e.error.message);Y.log("Error");}
+            },
+            cfg:{method: 'POST', headers: {'Content-Type': 'application/json'}}
+            
+        });
+    */
+
+    // The main problem here is that a GET request is sent but no effect takes place. The JSON-RPC calls aren't being made here.
         var ac = new Y.AutoComplete({
             inputNode: '#bz_ctag_add',
             render: '#bz_ctag_autocomp',
             resultListLocator: 'result',
             source: ds,
             requestTemplate: this.requestTemplate,
+            //method: 'POST',
+            //cfg:{method: 'POST', headers: {'Content-Type': 'application/json'}},
             maxResults: 7,
             minQueryLength: this.min_len,
             queryDelay: 0.5,
         });
         ac.render();
         //*********************************************
-        ac.on('results', function(query, results_array){ // is results the right event to use here in place of dataReturnEvent of YUI2 ?
+        ac.on('results', function(results_array){ // is results the right event to use here in place of dataReturnEvent of YUI2 ?
          Y.log(results_array);// What is the format of the data , how to use it ? Is autoHighlight a property of the data received. ?
         });
         /*
