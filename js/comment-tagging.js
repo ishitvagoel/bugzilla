@@ -26,10 +26,11 @@ YUI.bugzilla.commentTagging = {
         YUI.bugzilla.commentTagging.counter = YUI.bugzilla.commentTagging.counter + 1;
         Y.io.header('Content-Type', 'application/json'); // Sets the default Header
         return Y.JSON.stringify({
+            version: "1.1",
             method : "Bug.search_comment_tags",
             id : YUI.bugzilla.commentTagging.counter,
             params : {
-                    //Bugzilla_api_token: BUGZILLA.api_token,
+                    Bugzilla_api_token: BUGZILLA.api_token,
                     query : query,
                     limit : 10
                 }
@@ -52,12 +53,10 @@ YUI.bugzilla.commentTagging = {
         ds.plug(Y.Plugin.DataSourceJSONSchema, {
             schema: {
                 resultListLocator: "result",
-                //**************************************************
-                resultFields: ['result'], // Which field do we need to mention here http://www.bugzilla.org/docs/tip/en/html/api/Bugzilla/WebService/Bug.html#search_comment_tags
                 metaFields : { error: "error", jsonRpcId: "id"}
             }
         }).plug(Y.Plugin.DataSourceCache, { max: 5 });
-        /* The following executes but there is an error stating that Parameters are wrong for JSONRPC
+        /* 
             
         ds.sendRequest({
             request: Y.JSON.stringify({
@@ -82,20 +81,17 @@ YUI.bugzilla.commentTagging = {
         var ac = new Y.AutoComplete({
             inputNode: '#bz_ctag_add',
             render: '#bz_ctag_autocomp',
-            resultListLocator: 'result',
             source: ds,
             requestTemplate: this.requestTemplate,
-            //method: 'POST',
-            //cfg:{method: 'POST', headers: {'Content-Type': 'application/json'}},
             maxResults: 7,
             minQueryLength: this.min_len,
             queryDelay: 0.5,
         });
         ac.render();
         //*********************************************
-        ac.on('results', function(results_array){ // is results the right event to use here in place of dataReturnEvent of YUI2 ?
+        /*ac.on('results', function(results_array){ // is results the right event to use here in place of dataReturnEvent of YUI2 ?
          Y.log(results_array);// What is the format of the data , how to use it ? Is autoHighlight a property of the data received. ?
-        });
+        });*/
         /*
         var ac = new YAHOO.widget.AutoComplete('bz_ctag_add', 'bz_ctag_autocomp', ds);
         ac.maxResultsDisplayed = 7;
@@ -118,7 +114,7 @@ YUI.bugzilla.commentTagging = {
         ac.autoHighlight = false;
         ac.typeAhead = true; // What will be the equivalent here ?
         ac.queryDelay = 0.5;
-        ac.dataReturnEvent.subscribe(function(type, args) { // Will we use the results event here ?
+            ac.dataReturnEvent.subscribe(function(type, args) { // Will we use the results event here ?
             args[0].autoHighlight = args[2].length == 1;
         });
         */
