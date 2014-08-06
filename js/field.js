@@ -435,7 +435,7 @@ function showDuplicateItem(e) {
             dup_id.blur();
         }
     }
-    //e.preventDefault(); //prevents the hyperlink from going to the url in the href.
+    e.preventDefault(); //prevents the hyperlink from going to the url in the href.
 }
 
 function setResolutionToDuplicate(e, duplicate_or_move_bug_status) {
