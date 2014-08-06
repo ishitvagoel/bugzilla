@@ -89,10 +89,10 @@ function _errorFor(field, name) {
  * you need to modify the documentation in said template as well. */
 function createCalendar(name, start_weekday, months_long, weekdays_short) {
     var cal = new Y.Calendar({
-        contentBox: '#con_calendar' + name,
+        contentBox: '#con_calendar_' + name,
         showPrevMonth: true,
         showNextMonth: true,
-        date: new Date()    
+        date: new Date(),    
     });
     if(start_weekday)//For testing ; sometimes this parameter is undefined.
     cal.set('strings.first_weekday', start_weekday); // as per http://yuilibrary.com/forum-archive/forum/viewtopic.php@p=30610.html
@@ -249,7 +249,7 @@ function showEditableField (e, ContainerInputArray) {
     if ( ! inputArea ){
         e.preventDefault();
         return;
-    }
+    }   
     Y.one('#' + ContainerInputArray[0]).addClass('bz_default_hidden');
     inputArea.removeClass('bz_default_hidden');
     if ( inputArea.get('tagName').toLowerCase() == "input" ) {
@@ -265,7 +265,7 @@ function showEditableField (e, ContainerInputArray) {
         var type = inputs[0].get('tagName').toLowerCase();
         if (ContainerInputArray[3]) {
             if ( type == "input" ) {
-                inputs[0].get('value') = ContainerInputArray[3];
+                inputs[0].set('value', ContainerInputArray[3]);
             } else {
                 for (var i = 0; inputs[0].size(); i++) {
                     if ( inputs[0].get('options').item(i).get('value') == ContainerInputArray[3] ) { //To confirm the access of options NodeList here.
@@ -375,8 +375,8 @@ function initDefaultCheckbox(field_id){
 function showHideStatusItems(e, dupArrayInfo) {
     var el = document.getElementById('bug_status');
     // finish doing stuff based on the selection.
-    if ( e ) { //// Should it be el or e ?
-        showDuplicateItem(e); // Should it be el or e ?
+    if ( el ) { //// Should it be el or e ?
+        showDuplicateItem(el); // Should it be el or e ?
 
         // Make sure that fields whose visibility or values are controlled
         // by "resolution" behave properly when resolution is hidden.
@@ -435,7 +435,7 @@ function showDuplicateItem(e) {
             dup_id.blur();
         }
     }
-    e.preventDefault(); //prevents the hyperlink from going to the url in the href.
+    //e.preventDefault(); //prevents the hyperlink from going to the url in the href.
 }
 
 function setResolutionToDuplicate(e, duplicate_or_move_bug_status) {
@@ -499,10 +499,11 @@ function setClassification() {
  * been added to the DOM.
  */
 function showFieldWhen(controlled_id, controller_id, values) {
+    var controller = Y.one('#controller_id');
     // Note that we don't get an object for "controlled" here, because it
     // might not yet exist in the DOM. We just pass along its id.
-    Y.one('#controller_id').on('change',handleVisControllerValueChange, null,
-                              [controlled_id, controller, values]);
+    controller.on('change',handleVisControllerValueChange, null,
+                              [controlled_id, controller.getDOMNode(), values]);
 }
 
 /**
@@ -569,7 +570,7 @@ function showValueWhen(target_field_id, target_value_ids,
     if (!bz_value_controller_has_handler[source_field_id]) {
         var source_field = Y.one('#' + source_field_id);
         source_field.on('change', handleValControllerChange, null,
-                                 [source_field, empty_shows_all]);
+                                 [source_field.getDOMNode(), empty_shows_all]);
         bz_value_controller_has_handler[source_field_id] = true;
     }
 }
@@ -882,7 +883,7 @@ YUI.bugzilla.fieldAutocomplete = {
         this.dataSource[field] =
           new Y.DataSource.Local( { source: YUI.bugzilla.field_array[field] } );
           this.dataSource[field].sendRequest();
-          //Y.log(this.dataSource);
+          Y.log(this.dataSource);
           //new YAHOO.util.LocalDataSource( YAHOO.bugzilla.field_array[field] );
     },
     init : function( field, container ) {

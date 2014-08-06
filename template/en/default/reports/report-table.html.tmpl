@@ -121,7 +121,7 @@ Y.on("load", function() {
       ];
 */      
   this.parseString = function(str) {
-    return YAHOO.lang.trim(str);
+    return Y.Lang.trim(str);
   };
 
   this.parseNumber = function(str) {
@@ -134,26 +134,34 @@ Y.on("load", function() {
     if (res && res[1])
       return parseFloat(res[1]);
   };
-// The following has been don as per. https://yuilibrary.com/yui/docs/datasource/datasource-local.html
+// The following has been don as per. https://yuilibrary.com/yui/docs/datasource/datasource-local.html Can we create a json of the table ?
   var table = Y.Node.getDOMNode(Y.one("#tabular_report_[% tbl FILTER html FILTER js %]"));
   this.myDataSource = new Y.DataSource.Local({source:table});
-  //this.myDataSource.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
+  //this.myDataSource.responseType = YAHOO."td[1]"util.DataSource.TYPE_HTMLTABLE;
   this.myDataSource.plug(Y.Plugin.DataSourceXMLSchema, {
     schema: {
       resultListLocator: "tr",
       //How do we mention the locators for the fields here ?
       resultFields: [
-          {key:"row_title", parser:this.parseString}, // Can we use formatter instead of parser ?
+          {key:"row_title", locator:"td[1]"}, // Can we use formatter instead of parser ?
           [% FOREACH col = col_names %]
-            {key:"[% col FILTER js %]", parser:this.parseNumber},
+            {key:"[% col FILTER js %]",locator:"" parser:this.parseNumber},//Here we need to generate the locator using TT2.
           [% END %]
-          {key:"total", parser:this.parseNumber}
+          {key:"total",locator: parser:this.parseNumber} // Here we need to generate the locator using TT2
       ]
     }
   });
 
-  myDataSource.sendRequest();// any config options needed ?
-
+  var myCallback = { // For test purpose only.
+            success: function(e){
+                Y.log(e.response);
+            },
+            failure: function(e){
+                Y.log("Could not retrieve data: " + e.error.message);
+            }
+        };
+  this.myDataSource.sendRequest({callback : myCallback});// any config options needed ?
+  Y.log(this.myDataSource);
   /* = {
     fields: [
       {key:"row_title", parser:this.parseString},
@@ -164,13 +172,13 @@ Y.on("load", function() {
     ]
   };
   */ 
-  this.myDataTable = new Y.DataTable({
+  //this.myDataTable = new Y.DataTable({
     
-  });
+  });/*
   this.myDataTable = new YAHOO.widget.DataTable("tabular_report_container_
                          [% tbl FILTER js %]", myColumnDefs, this.myDataSource, 
                          {formatRow: totalRowFormatter});
-});
+});*/
 </script>
 
 [% IF tbl_field %]

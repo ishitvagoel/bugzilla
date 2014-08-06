@@ -20,7 +20,7 @@
       [% IF user.settings.quote_replies.value == 'quoted_reply' %]
         /* pre id="comment_name_N" */
         var text_elem = document.getElementById('comment_text_'+id);
-        var text = getText(text_elemY);
+        var text = getText(text_elem);
         replytext = prefix + wrapReplyText(text);
       [% ELSIF user.settings.quote_replies.value == 'simple_reply' %]
         replytext = prefix;
