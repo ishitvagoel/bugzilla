@@ -94,7 +94,7 @@ function createCalendar(name, start_weekday, months_long, weekdays_short) {
         showNextMonth: true,
         date: new Date()    
     });
-    if(start_weekday)//For testing ; sometimes this option is undefined.
+    if(start_weekday)//For testing ; sometimes this parameter is undefined.
     cal.set('strings.first_weekday', start_weekday); // as per http://yuilibrary.com/forum-archive/forum/viewtopic.php@p=30610.html
     if(weekdays_short)
     cal.set('strings.very_short_weekdays', weekdays_short);
@@ -102,9 +102,10 @@ function createCalendar(name, start_weekday, months_long, weekdays_short) {
     var field = document.getElementById(name);
     cal.on("selectionChange", setFieldFromCalendar, null, field);    
     updateCalendarFromField(field);
-    cal.render();
+    cal.render('#con_calendar' + name);
+    cal.hide();
 }
-    
+
 /* The onclick handlers for the button that shows the calendar. */
 function showCalendar(field_name) {
     var calendar  = YUI.bugzilla["calendar_" + field_name];
@@ -113,9 +114,9 @@ function showCalendar(field_name) {
     var calendar_container = calendar.get('contentBox').getDOMNode();
     bz_overlayBelow(calendar_container, field);
     calendar.show();
-    button.on('click', function() { 
+    button.getDOMNode().onclick = function() { 
         hideCalendar(field_name);
-    });
+    };
 
     // Because of the way removeListener works, this has to be a function
     // attached directly to this calendar.
@@ -133,7 +134,7 @@ function showCalendar(field_name) {
     Y.one('body').on('click', calendar.bz_myBodyCloser, calendar) ;
 
     // Make Esc close the calendar.
-    calendar.bz_escCal = function (event) {
+    calendar.bz_escCal = function(event) {
         var key = event.charCode; // To confirm
         if (key == 27) {
             hideCalendar(field_name);
@@ -145,9 +146,10 @@ function showCalendar(field_name) {
 function hideCalendar(field_name) {
     var cal = YUI.bugzilla["calendar_" + field_name];
     cal.hide(); 
-    Y.one('#button_calendar_' + field_name).on('click', function() { 
+    var button = document.getElementById('button_calendar_' + field_name);
+    button.onclick = function() { 
         showCalendar(field_name);
-    });
+    };
     var documentBody = Y.one('body');
     documentBody.detach('click',cal.bz_myBodyCloser);
     documentBody.detach('keydown', cal.bz_escCal);
@@ -156,7 +158,7 @@ function hideCalendar(field_name) {
 /* This is the selectEvent for our Calendar objects on our custom 
  * DateTime fields.
  */
-function setFieldFromCalendar(ev,data_field) {
+function setFieldFromCalendar(ev,date_field) {
     var dates = ev.newSelection[0];
 
     // We can't just write the date straight into the field, because there 
@@ -205,9 +207,10 @@ function updateCalendarFromField(date_field) {
         cal.selectDates(new Date(pieces[1], pieces[2] - 1, pieces[3]));
         var selectedArray = cal.get('selectedDates');
         var selected = selectedArray[0];
+        cal.deselectDates(selected);
         cal.set("date", (selected.getMonth() + 1) + '/' 
                                         + selected.getFullYear()); // date is used to set the current visible date.
-        cal.render();
+        cal.show();
     }
 }
 
@@ -372,8 +375,8 @@ function initDefaultCheckbox(field_id){
 function showHideStatusItems(e, dupArrayInfo) {
     var el = document.getElementById('bug_status');
     // finish doing stuff based on the selection.
-    if ( el ) {
-        showDuplicateItem(el);
+    if ( e ) { //// Should it be el or e ?
+        showDuplicateItem(e); // Should it be el or e ?
 
         // Make sure that fields whose visibility or values are controlled
         // by "resolution" behave properly when resolution is hidden.
@@ -827,29 +830,13 @@ YUI.bugzilla.userAutocomplete = {
           } ]
       };
       var stringified =  Y.JSON.stringify(json_object);
-      var debug = { msg: "json-rpc obj debug info", "json obj": json_object, 
-                    "param" : stringified}
-      YUI.bugzilla.userAutocomplete.debug_helper( debug );
       return stringified;
     },
     resultListFormat : function(query, results) {
-        //********************************************
         return Y.Array.map(results, function(result){
-            return (result.real_name.display + " (" + result.name.display + ")");
+            return (Y.Escape.html(result.raw.real_name) + " (" + Y.Escape.html(result.raw.name) + ")");
         });
-        // To confirm the usage of results object. The display attirbute contains the HTML escaped values.
-
-        //return ( YAHOO.lang.escapeHTML(oResultData.real_name) + " ("
-          //       + YAHOO.lang.escapeHTML(oResultData.name) + ")");
-    },  
-    /*debug_helper : function ( evt ){
-        //used to help debug any errors that might happen
-        if( typeof(console) !== 'undefined' && console != null && arguments.length > 0 ){
-            console.log("debug helper info:", arguments);
-        }
-        return true;
     },
-    */
     init_ds : function(){
         var new_ds = new Y.DataSource.IO({
             source: "jsonrpc.cgi", ioConfig: { method: "POST",
@@ -867,31 +854,16 @@ YUI.bugzilla.userAutocomplete = {
         }).plug(Y.Plugin.DataSourceCache, { max: 5 });
         
         this.dataSource = new_ds;
-        /*
-        this.dataSource = new YAHOO.util.XHRDataSource("jsonrpc.cgi");
-        this.dataSource.connTimeout = 30000;
-        this.dataSource.connMethodPost = true;
-        this.dataSource.connXhrMode = "cancelStaleRequests";
-        this.dataSource.maxCacheEntries = 5;
-        this.dataSource.responseSchema = {
-            resultsList : "result.users",
-            metaFields : { error: "error", jsonRpcId: "id"},
-            fields : [
-                { key : "name" },
-                { key : "real_name"}
-            ]
-        };
-        */
     },
     init : function( field, container, multiple ) {
         if( this.dataSource == null ){
             this.init_ds();  
         }
         var userAutoComp = new Y.AutoComplete({
-            inputNode: field,
-            render: container,
+            inputNode: '#' + field,
+            render: '#' + container,
             source: this.dataSource,
-            requestTemplate: this.generateRequest, //Should we change the name of the function ?
+            requestTemplate: this.generateRequest,
             resultFormatter: this.resultListFormat,
             maxResults: BUGZILLA.param.maxusermatches,
             minQueryLength: 3,
@@ -901,25 +873,6 @@ YUI.bugzilla.userAutocomplete = {
             userAutoComp.set('queryDelimiter', ',');
         }
         userAutoComp.render();
-        /*
-        var userAutoComp = new YAHOO.widget.AutoComplete( field, container, 
-                                this.dataSource );
-        // other stuff we might want to do with the autocomplete goes here
-        userAutoComp.maxResultsDisplayed = BUGZILLA.param.maxusermatches;
-        userAutoComp.generateRequest = this.generateRequest;
-        userAutoComp.formatResult = this.resultListFormat;
-        userAutoComp.doBeforeLoadData = this.debug_helper;
-        userAutoComp.minQueryLength = 3;
-        userAutoComp.autoHighlight = false;//********************
-        // this is a throttle to determine the delay of the query from typing
-        // set this higher to cause fewer calls to the server
-        userAutoComp.queryDelay = 0.05;
-        userAutoComp.useIFrame = true; //*********************
-        userAutoComp.resultTypeList = false;//*************************
-        if( multiple == true ){
-            userAutoComp.delimChar = [","];
-        }
-        */
     }
 };
 
@@ -928,6 +881,8 @@ YUI.bugzilla.fieldAutocomplete = {
     init_ds : function( field ) {
         this.dataSource[field] =
           new Y.DataSource.Local( { source: YUI.bugzilla.field_array[field] } );
+          this.dataSource[field].sendRequest();
+          //Y.log(this.dataSource);
           //new YAHOO.util.LocalDataSource( YAHOO.bugzilla.field_array[field] );
     },
     init : function( field, container ) {
@@ -936,21 +891,21 @@ YUI.bugzilla.fieldAutocomplete = {
         }
         var fieldAutoComp =
           new Y.AutoComplete({
-            inputNode: field,
-            render: container,
+            inputNode: '#' + field,
+            render: '#' + container,
             source: this.dataSource[field],
             maxResults: YUI.bugzilla.field_array[field].length,
             resultFormatter: function(query, results){
+                Y.log(results);
                 return Y.Array.map(results, function(result){
-                    return result.display;// For HTML escaped values.
+                    return Y.Escape.html(result.raw);
                 });
             },
-    
             minQueryLength: 0,
             queryDelimiter: ',', //[","," "], // Are we allowed to use the array of delimiters in YUI 3?
             queryDelay: 0,
           });
-         fieldAutoComp.render(); 
+         //fieldAutoComp.render(); 
 
           /*
         fieldAutoComp.maxResultsDisplayed = YAHOO.bugzilla.field_array[field].length;
