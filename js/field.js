@@ -160,11 +160,11 @@ function hideCalendar(field_name) {
  */
 function setFieldFromCalendar(ev,date_field) {
     var dates = ev.newSelection[0];
-    /*if(!dates) {
+    if(!dates) {
         date_field.value = "";
         hideCalendar(date_field.id);
         return;
-    } */   
+    }
     // We can't just write the date straight into the field, because there 
     // might already be a time there.
     var timeRe = /\b(\d{1,2}):(\d\d)(?::(\d\d))?/;
