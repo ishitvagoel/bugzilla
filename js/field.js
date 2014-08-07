@@ -473,9 +473,9 @@ function boldOnChange(e, field_id){
 
 function updateCommentTagControl(checkbox, field) {
     if (checkbox.checked) {
-        Y.one('#field').addClass('bz_private');
+        Y.one('#' + field).addClass('bz_private');
     } else {
-        Y.one('#field').removeClass('bz_private');
+        Y.one('#' + field).removeClass('bz_private');
     }
 }
 
@@ -499,7 +499,7 @@ function setClassification() {
  * been added to the DOM.
  */
 function showFieldWhen(controlled_id, controller_id, values) {
-    var controller = Y.one('#controller_id');
+    var controller = Y.one('#' + controller_id);
     // Note that we don't get an object for "controlled" here, because it
     // might not yet exist in the DOM. We just pass along its id.
     controller.on('change',handleVisControllerValueChange, null,
