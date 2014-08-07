@@ -160,7 +160,11 @@ function hideCalendar(field_name) {
  */
 function setFieldFromCalendar(ev,date_field) {
     var dates = ev.newSelection[0];
-
+    /*if(!dates) {
+        date_field.value = "";
+        hideCalendar(date_field.id);
+        return;
+    } */   
     // We can't just write the date straight into the field, because there 
     // might already be a time there.
     var timeRe = /\b(\d{1,2}):(\d\d)(?::(\d\d))?/;
@@ -208,9 +212,8 @@ function updateCalendarFromField(date_field) {
         var selectedArray = cal.get('selectedDates');
         var selected = selectedArray[0];
         cal.deselectDates(selected);
-        cal.set("date", (selected.getMonth() + 1) + '/' 
-                                        + selected.getFullYear()); // date is used to set the current visible date.
-        cal.show();
+        cal.set("date", selected); // date is used to set the current visible date.
+        //cal.showCalendar();
     }
 }
 
@@ -392,7 +395,9 @@ function showHideStatusItems(e, dupArrayInfo) {
         if (resolution_settings_warning) {
             resolution_settings_warning.addClass('bz_default_hidden');
         }
-        Y.one('#duplicate_display').addClass('bz_default_hidden');
+        var duplicate_display = Y.one('#duplicate_display'); //For testing
+        if(duplicate_display)
+        duplicate_display.addClass('bz_default_hidden');
 
 
         if ( (el.value == dupArrayInfo[1] && dupArrayInfo[0] == "is_duplicate")
@@ -435,7 +440,7 @@ function showDuplicateItem(e) {
             dup_id.blur();
         }
     }
-    e.preventDefault(); //prevents the hyperlink from going to the url in the href.
+    YAHOO.util.Event.preventDefault(e);//e.preventDefault(); //prevents the hyperlink from going to the url in the href.
 }
 
 function setResolutionToDuplicate(e, duplicate_or_move_bug_status) {
