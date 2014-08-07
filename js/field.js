@@ -1029,8 +1029,8 @@ function show_comment_preview(bug_id) {
     if (!comment || !preview) return;
     if (Y.one('#comment_preview_tab').hasClass('active_comment_tab')) return;
 
-    preview.get('style').width = (comment.get('clientWidth') - 4) + 'px';
-    preview.get('style').height = comment.get('offsetHeight') + 'px';
+    preview.getDOMNode().style.width = (comment.get('clientWidth') - 4) + 'px';
+    preview.getDOMNode().style.height = comment.get('offsetHeight') + 'px';
 
     var comment_tab = Y.one('#comment_tab');
     comment.addClass('bz_default_hidden');
