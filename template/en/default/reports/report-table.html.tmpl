@@ -172,7 +172,12 @@ Y.on("load", function() {
     ]
   };
   */ 
-  //this.myDataTable = new Y.DataTable({
+  this.myDataTable = new Y.DataTable({
+    columns: myColumnDefs
+  }).plug(Y.Plugin.DataTableDataSource, {
+      datasource: this.dataSource
+  }).render("#tabular_report_container_[% tbl FILTER js %]");
+  this.myDataTable.datasource.load();
     
   });/*
   this.myDataTable = new YAHOO.widget.DataTable("tabular_report_container_
