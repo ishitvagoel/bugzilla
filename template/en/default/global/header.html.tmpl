@@ -67,6 +67,7 @@
     "js/yui/yahoo-dom-event/yahoo-dom-event.js"
 ] %]
 
+
 [%# We should be able to set the default value of the header variable
   # to the value of the title variable using the DEFAULT directive,
   # but that doesn't work if a caller sets header to the empty string
@@ -115,7 +116,7 @@
     [%# YUI3 Scripts %]
     [% FOREACH yui_name = yui3 %]
       [% starting_js_urls.push("js/yui3/$yui_name/${yui_name}.js") %]
-      [% starting_js_urls.push("js/yui3/$yui_name/lang/${yui_name}.js") %]
+      [% starting_js_urls.push("js/yui3/$yui_name/lang/${yui_name}.js") # For testing %]
     [% END %]
     [% starting_js_urls.push('js/global.js') %]
 

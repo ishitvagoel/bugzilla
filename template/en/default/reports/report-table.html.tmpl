@@ -117,7 +117,7 @@ Y.on("load", function() {
            formatter:this.Linkify, sortOptions: { defaultDir: YAHOO.widget.DataTable.CLASS_DESC, sortFunction:totalNallowHTML: true,allowHTML: true,umberSorter }},
         [% END %]
         {key:"total", label:"Total", sortable:true, formatter:this.LinkifyTotal,
-         sortOptions: { defaultDir: YAHOO.widget.DataTable.CLASS_DESC, sortFuncti:totalNumberSorter }}
+         sortOptions: { defaultDir: YAHOO .widget.DataTable.CLASS_DESC, sortFuncti:totalNumberSorter }}
       ];
 */      
   this.parseString = function(str) {
@@ -143,11 +143,13 @@ Y.on("load", function() {
       resultListLocator: "tr",
       //How do we mention the locators for the fields here ?
       resultFields: [
-          {key:"row_title", locator:"td[1]"}, // Can we use formatter instead of parser ?
+          {key:"row_title", locator:"td[1]", parser:this.parseString}, // Can we use formatter instead of parser ?
+          [% i = 1 %]
           [% FOREACH col = col_names %]
-            {key:"[% col FILTER js %]",locator:"" parser:this.parseNumber},//Here we need to generate the locator using TT2.
+            [% i = i + 1 %]
+            {key:"[% col FILTER js %]",locator:"td[[% i %]]", parser:this.parseNumber},
           [% END %]
-          {key:"total",locator: parser:this.parseNumber} // Here we need to generate the locator using TT2
+          {key:"total",locator:"td[[% i + 1 %]]", parser:this.parseNumber}
       ]
     }
   });

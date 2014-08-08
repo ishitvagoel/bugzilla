@@ -92,7 +92,7 @@ function createCalendar(name, start_weekday, months_long, weekdays_short) {
         contentBox: '#con_calendar_' + name,
         showPrevMonth: true,
         showNextMonth: true,
-        date: new Date(),    
+        //date: new Date(),    
     });
     if(start_weekday)//For testing ; sometimes this parameter is undefined.
     cal.set('strings.first_weekday', start_weekday); // as per http://yuilibrary.com/forum-archive/forum/viewtopic.php@p=30610.html
@@ -100,7 +100,7 @@ function createCalendar(name, start_weekday, months_long, weekdays_short) {
     cal.set('strings.very_short_weekdays', weekdays_short);
     YUI.bugzilla['calendar_' + name] = cal;
     var field = document.getElementById(name);
-    cal.on("selectionChange", setFieldFromCalendar, null, field);    
+    cal.on("selectionChange", setFieldFromCalendar, null, cal.get('date'), field);// How do we pass the set deadline ? The deadline isn't being showed in the input box.
     updateCalendarFromField(field);
     cal.render('#con_calendar' + name);
     cal.hide();
@@ -158,18 +158,16 @@ function hideCalendar(field_name) {
 /* This is the selectEvent for our Calendar objects on our custom 
  * DateTime fields.
  */
-function setFieldFromCalendar(ev,date_field) {
+function setFieldFromCalendar(ev, cal_date, date_field) {
     var dates = ev.newSelection[0];
     if(!dates) {
-        date_field.value = "";
-        hideCalendar(date_field.id);
-        return;
+        dates = cal_date;
     }
     // We can't just write the date straight into the field, because there 
     // might already be a time there.
-    var timeRe = /\b(\d{1,2}):(\d\d)(?::(\d\d))?/;
-    var currentTime = timeRe.exec(date_field.value);
     var d = Y.Date.parse(dates);
+    var timeRe = /\b(\d{1,2}):(\d\d)(?::(\d\d))?/;
+    var currentTime = timeRe.exec(date_field.value);     
     if (currentTime) {
         d.setHours(currentTime[1], currentTime[2]);
         if (currentTime[3]) {
@@ -230,6 +228,7 @@ function hideEditableField( container, input, action, field_id, original_value, 
     Y.one('#' + input).addClass('bz_default_hidden');
     Y.one('#' + action).on('click', showEditableField, null,
                                  new Array(container, input, field_id, new_value));
+    Y.log(new Array(container, input, field_id, original_value, hide_input ));
     if(field_id != ""){
         Y.on('load', checkForChangedFieldValues, null, //To confirm whether Y.on will be good enough ?
                         new Array(container, input, field_id, original_value, hide_input ));
@@ -440,7 +439,7 @@ function showDuplicateItem(e) {
             dup_id.blur();
         }
     }
-    YAHOO.util.Event.preventDefault(e);//e.preventDefault(); //prevents the hyperlink from going to the url in the href.
+    e.preventDefault();//YAHOO.util.Event.preventDefault(e);//prevents the hyperlink from going to the url in the href.
 }
 
 function setResolutionToDuplicate(e, duplicate_or_move_bug_status) {
