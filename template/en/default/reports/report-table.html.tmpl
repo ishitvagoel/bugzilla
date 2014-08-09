@@ -70,22 +70,22 @@ Y.on("load", function() {
     elLiner.cell.ancestor().addClass("ttotal");
   };
 //To confirm
-  var totalRowFormatter = function( elTr) {
+  var totalRowFormatter = function( elTr) {// http://yuilibrary.com/yui/docs/api/classes/DataTable.html#method_modifyRow ??
       if ( elTr.record.get("row_title") == "Total" ) {
           elTr.cell.addClass( 'ttotal' );
       }
       return true;
   };
 
-  var totalNumberSorter = function( a, b, desc, field ){ // What to do with the field parameter in YUI3 ? The sortFn only accepts the first three. 
+  var totalNumberSorter = function( a, b, desc){ // What to do with the field parameter in YUI3 ? The sortFn only accepts the first three. 
    // http://yuilibrary.com/yui/docs/api/classes/YUI.html#method_rbind ??
    // Y.rbind(genericSortFunction,this,'fieldName');
    //generic sort function will be defined as genericSortFunction(modelA,modelB,desc,fieldName(;
-    //var a_field = a.get('key');
-    var a_value = a.getData(field); //To do 
-    var b_value = b.getData(field);
-    var a_total_test = a.getData("row_title");
-    var b_total_test = b.getData("row_title");
+    var field = a.get('key'); // is it correct ?
+    var a_value = a.get(field); //To do 
+    var b_value = b.get(field);
+    var a_total_test = a.get("row_title");
+    var b_total_test = b.get("row_title");
     var comp_result = YAHOO.util.Sort.compare(a_value, b_value, desc);
     if( a_total_test == "Total" ){
       comp_result = 1;
@@ -143,13 +143,14 @@ Y.on("load", function() {
       resultListLocator: "tr",
       //How do we mention the locators for the fields here ?
       resultFields: [
-          {key:"row_title", locator:"td[1]", parser:this.parseString}, // Can we use formatter instead of parser ?
+          {key:"row_title", locator:"td[1]" }, parser:this.parseString}, // Can we use formatter instead of parser ? What about recordType property of dataTable ? https://yuilibrary.com/yui/docs/datatable/datatable-recordtype.html
+          // https://yuilibrary.com/yui/docs/datatype/ The last example uses the parser attribute.
           [% i = 1 %]
           [% FOREACH col = col_names %]
             [% i = i + 1 %]
-            {key:"[% col FILTER js %]",locator:"td[[% i %]]", parser:this.parseNumber},
+            {key:"[% col FILTER js %]",locator:"td[[% i %]]" }, parser:this.parseNumber},
           [% END %]
-          {key:"total",locator:"td[[% i + 1 %]]", parser:this.parseNumber}
+          {key:"total",locator:"td[[% i + 1 %]]" }, parser:this.parseNumber}
       ]
     }
   });
