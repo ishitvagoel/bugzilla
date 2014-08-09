@@ -45,7 +45,7 @@ Y.on("load", function() {
     if (elLiner.value == 0)
       elLiner.value = ".";
     else if (elLiner.data.row_title == "Total") // Is this correct ? https://yuilibrary.com/yui/docs/datatable/#formatter-props
-      elLiner.value = '<a href="[% urlbase FILTER js %]&amp;[% col_field FILTER uri FILTER js %]='
+      elLiner.value = '<a href="[% urlbase FILTER js %]&amp;[% col_field FILTER uri FILTER js %]='  
                           + bz_encode(elLiner.column.key) // is this correct for oColumn.field ?
                           + '[% "&amp;" _ row_vals IF row_vals %]">' + elLiner.value + '</a>';
     else
@@ -105,7 +105,7 @@ Y.on("load", function() {
            sortFn:totalNumberSorter
          },
         [% END %]
-        {key:"total", label:"Total", allowHTML: true, sortable:true, formatter:this.LinkifyTotal,
+        {key:"total", label:"Total", allowHTML: true, sortable:true, nodeFormatter:this.LinkifyTotal,
           sortFn: totalNumberSorter
         }
       ];
@@ -150,7 +150,7 @@ Y.on("load", function() {
             [% i = i + 1 %]
             {key:"[% col FILTER js %]",locator:"td[[% i %]]" }, parser:this.parseNumber},
           [% END %]
-          {key:"total",locator:"td[[% i + 1 %]]" }, parser:this.parseNumber}
+          {key:"total",locator:"td[[% i + 1 %]]", parser:this.parseNumber}
       ]
     }
   });
@@ -168,7 +168,7 @@ Y.on("load", function() {
   /* = {
     fields: [
       {key:"row_title", parser:this.parseString},
-      [% FOREACH col = col_names %]
+      [% FOREACH col = col_names %] 
         {key:"[% col FILTER js %]", parser:this.parseNumber},
       [% END %]
       {key:"total", parser:this.parseNumber}
