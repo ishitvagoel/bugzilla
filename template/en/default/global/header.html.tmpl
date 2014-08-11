@@ -32,6 +32,7 @@
   onload = ""
   style_urls = []
   #For Testing
+  yui = []
   yui3_lang = [
                'datatype-date-format',
                'autocomplete-list',
@@ -60,13 +61,6 @@
           'node-style',
   ]
 %]
-
-[% SET yui_css = {
-  autocomplete => 1,
-  calendar     => 1,
-  datatable    => 1,
-  button       => 1,
-} %]
 
 [%# Note: This is simple dependency resolution--you can't have dependencies
   # that depend on each other. You have to specify all of a module's deps,
@@ -202,7 +196,7 @@
             [% INCLUDE $yui_template %]
           [% END %]
         [% END %]
-        
+
         [% IF javascript %]
           [% javascript %]
         [% END %]
