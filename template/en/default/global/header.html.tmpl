@@ -149,12 +149,6 @@
     <script type="text/javascript">
     <!--
         YUI.add('bugzilla').namespace('bugzilla');
-        
-        [% FOREACH yui_name = yui3 %]
-          [% FOREACH yui_template = yui_templates.$yui_name %]
-            [% INCLUDE $yui_template %]
-          [% END %]
-        [% END %]
 
         var Y = YUI({bootstrap: false}).use('node'
           [% FOREACH module = yui3 %]
@@ -203,6 +197,11 @@
               , api_token: '[% get_api_token FILTER js FILTER html %]'
             [% END %]
         };
+        [% FOREACH yui_name = yui3 %]
+          [% FOREACH yui_template = yui_templates.$yui_name %]
+            [% INCLUDE $yui_template %]
+          [% END %]
+        [% END %]
         
         [% IF javascript %]
           [% javascript %]
