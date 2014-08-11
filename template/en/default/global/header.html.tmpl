@@ -31,8 +31,34 @@
   header_addl_info = ""
   onload = ""
   style_urls = []
-  yui = []
-  yui3 = []
+  #For Testing
+  yui3_lang = [
+               'datatype-date-format',
+               'autocomplete-list',
+               'autocomplete-list_en',
+               'calendar-base',
+  ]
+  yui3 = [
+          'oop',
+          'event-custom-base',
+          'event-base',
+          'features',
+          'dom-core',
+          'dom-base',
+          'selector-native',
+          'selector',
+          'node-core',
+          'dom-style',
+          'node-base',
+          'event-delegate',
+          'node-event-delegate',
+          'pluginhost-base',
+          'pluginhost-config',
+          'node-pluginhost',
+          'dom-screen',
+          'node-screen',
+          'node-style',
+  ]
 %]
 
 [% SET yui_css = {
@@ -62,11 +88,8 @@
   # every other JS URL.
   #%]
 [% SET starting_js_urls = [
-    "js/yui3/yui/yui.js",
-    "js/yui/cookie/cookie-min.js",
-    "js/yui/yahoo-dom-event/yahoo-dom-event.js"
+    "js/yui3/yui/yui-min.js"
 ] %]
-
 
 [%# We should be able to set the default value of the header variable
   # to the value of the title variable using the DEFAULT directive,
@@ -93,7 +116,6 @@
 
     [% SET yui = yui_resolve_deps(yui, yui_deps) %]
     
-    [% SET css_sets = css_files(style_urls, yui) %]
     [% SET css_sets = css_files(style_urls, yui3) %]
     <link href="[% css_sets.unified_standard_skin FILTER html %]"
           rel="stylesheet" type="text/css">
@@ -108,15 +130,15 @@
       <link href="[% css_sets.unified_custom FILTER html %]"
             rel="stylesheet" type="text/css">
     [% END %]
-
-    [%# YUI Scripts %]
-    [% FOREACH yui_name = yui %]
-      [% starting_js_urls.push("js/yui/$yui_name/${yui_name}-min.js") %]
-    [% END %]
+    
     [%# YUI3 Scripts %]
+    
     [% FOREACH yui_name = yui3 %]
       [% starting_js_urls.push("js/yui3/$yui_name/${yui_name}.js") %]
-      [% starting_js_urls.push("js/yui3/$yui_name/lang/${yui_name}.js") # For testing %]
+    [% END %]
+
+    [% FOREACH yui_name = yui3_lang %]
+      [% starting_js_urls.push("js/yui3/$yui_name/lang/${yui_name}.js") %]
     [% END %]
     [% starting_js_urls.push('js/global.js') %]
 
@@ -127,27 +149,29 @@
     <script type="text/javascript">
     <!--
         YUI.add('bugzilla').namespace('bugzilla');
-        YAHOO.namespace('bugzilla');
-        YAHOO.util.Event.addListener = function (el, sType, fn, obj, overrideContext) {
-               if ( ("onpagehide" in window || YAHOO.env.ua.gecko) && sType === "unload") { sType = "pagehide"; };
-               var capture = ((sType == "focusin" || sType == "focusout") && !YAHOO.env.ua.ie) ? true : false;
-               return this._addListener(el, this._getType(sType), fn, obj, overrideContext, capture);
-         };
-        if ( "onpagehide" in window || YAHOO.env.ua.gecko) {
-            YAHOO.util.Event._simpleRemove(window, "unload", 
-                                           YAHOO.util.Event._unload);
-        }
+        
+        [% FOREACH yui_name = yui3 %]
+          [% FOREACH yui_template = yui_templates.$yui_name %]
+            [% INCLUDE $yui_template %]
+          [% END %]
+        [% END %]
+
+        var Y = YUI({bootstrap: false}).use('node'
+          [% FOREACH module = yui3 %]
+            [%~ %],'[% module FILTER js %]'
+          [% END ~%]
+        );
+
+        
         [%# The language selector needs javascript to set its cookie,
           # so it is hidden in HTML/CSS by the "bz_default_hidden" class.
           # If the browser can run javascript, it will then "unhide"
           # the language selector using the following code.
           #%]
         function unhide_language_selector() { 
-            YAHOO.util.Dom.removeClass(
-                'lang_links_container', 'bz_default_hidden'
-            ); 
+            Y.one('#lang_links_container').removeClass('bz_default_hidden');
         } 
-        YAHOO.util.Event.onDOMReady(unhide_language_selector);
+        Y.on('domready', unhide_language_selector);
 
         [%# Make some Bugzilla information available to all scripts. 
           # We don't import every parameter and constant because we
@@ -179,23 +203,6 @@
               , api_token: '[% get_api_token FILTER js FILTER html %]'
             [% END %]
         };
-
-        [% FOREACH yui_name = yui %]
-          [% FOREACH yui_template = yui_templates.$yui_name %]
-            [% INCLUDE $yui_template %]
-          [% END %]
-        [% END %]
-        [% FOREACH yui_name = yui3 %]
-          [% FOREACH yui_template = yui_templates.$yui_name %]
-            [% INCLUDE $yui_template %]
-          [% END %]
-        [% END %]
-
-        var Y = YUI({bootstrap: false}).use('node'
-          [% FOREACH module = yui3 %]
-            [%~ %],'[% module FILTER js %]'
-          [% END ~%]
-        );
         
         [% IF javascript %]
           [% javascript %]
