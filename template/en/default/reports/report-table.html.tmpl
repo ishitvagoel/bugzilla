@@ -30,9 +30,18 @@
 [% END %]
 
 <script type="text/javascript">
+
+var data = [ [% FOREACH row = row_names %]
+               [% FOREACH col = col_names %]
+                 [% NEXT IF col == "" %]
+               {"[% col FILTER js %]":"[% PROCESS value_display value = row field = row_field %]"}
+              [% END %]
+             [% END %]
+           ];
+Y.log(data);
 function bz_encode (str, decode) {
   // First decode HTML entities, if requested.
-  if (decode)
+  if (str && decode)//For Testing
     str = str.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"')
              .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+$/,"");
 
@@ -40,11 +49,11 @@ function bz_encode (str, decode) {
   return encodeURIComponent(str).replace(/'/g, escape);
 };
 
-Y.on("load", function() {
+Y.Node(window).on("load", function() {
   this.Linkify = function(elLiner) {
     if (elLiner.value == 0)
       elLiner.value = ".";
-    else if (elLiner.data.row_title == "Total") // Is this correct ? https://yuilibrary.com/yui/docs/datatable/#formatter-props
+    else if (Y.Lang.trim(elLiner.data.row_title) == "Total") // Is this correct ? https://yuilibrary.com/yui/docs/datatable/#formatter-props
       elLiner.value = '<a href="[% urlbase FILTER js %]&amp;[% col_field FILTER uri FILTER js %]='  
                           + bz_encode(elLiner.column.key) // is this correct for oColumn.field ?
                           + '[% "&amp;" _ row_vals IF row_vals %]">' + elLiner.value + '</a>';
@@ -56,16 +65,17 @@ Y.on("load", function() {
   };
 
   this.LinkifyTotal = function(elLiner) {
+    Y.log(elLiner);
     if (elLiner.value == 0) // Is it correct ?
-      elLiner.value = ".";
-    else if (elLiner.data.row_title == "Total")
-      elLiner.value = '<a href="[% urlbase FILTER js %][% "&amp;" _ row_vals IF row_vals %]
+      elLiner.cell.set('innerHTML', ".");
+    else if (Y.Lang.trim(elLiner.data.row_title) == "Total")
+      elLiner.cell.set('innerHTML', '<a href="[% urlbase FILTER js %][% "&amp;" _ row_vals IF row_vals %]
                           [%~ "&amp;" _ col_vals IF col_vals %]">'
-                          + elLiner.value + '</a>';
+                          + elLiner.value + '</a>');
     else
-      elLiner.value = '<a href="[% urlbase FILTER js %]&amp;[% row_field FILTER uri FILTER js %]='
+      elLiner.cell.set('innerHTML', '<a href="[% urlbase FILTER js %]&amp;[% row_field FILTER uri FILTER js %]='
                           + bz_encode(elLiner.data.row_title, 1)
-                          + '[% "&amp;" _ col_vals IF col_vals %]">' + elLiner.value + '</a>';
+                          + '[% "&amp;" _ col_vals IF col_vals %]">' + elLiner.value + '</a>');
 
     elLiner.cell.ancestor().addClass("ttotal");
   };
@@ -96,17 +106,18 @@ Y.on("load", function() {
   };
   
   var myColumnDefs = [
-        {key:"row_title", label:"", sortable:true,
-         sortFn:totalNumberSorter
+        {key:"row_title", label:"", //sortable:true,
+         //sortFn:totalNumberSorter
         },
         [% FOREACH col = col_names %]
-          {key:"[% col FILTER js %]", label:"[% display_value(col_field, col) FILTER html FILTER js %]", allowHTML: true, sortable:true,
+          {key:"[% col FILTER js %]", label:"[% display_value(col_field, col) FILTER html FILTER js %]", allowHTML: true,// sortable:true,
            formatter:this.Linkify, // Do we need to define the defaultDir in YUI3 as well ?
-           sortFn:totalNumberSorter
+           //sortFn:totalNumberSorter
          },
         [% END %]
-        {key:"total", label:"Total", allowHTML: true, sortable:true, nodeFormatter:this.LinkifyTotal,
-          sortFn: totalNumberSorter
+        {key:"total", label:"Total", allowHTML: true, //sortable:true,
+        nodeFormatter:this.LinkifyTotal,
+          //sortFn: totalNumberSorter
         }
       ];
 /*
@@ -137,20 +148,20 @@ Y.on("load", function() {
 // The following has been don as per. https://yuilibrary.com/yui/docs/datasource/datasource-local.html Can we create a json of the table ?
   var table = Y.Node.getDOMNode(Y.one("#tabular_report_[% tbl FILTER html FILTER js %]"));
   this.myDataSource = new Y.DataSource.Local({source:table});
+  //Y.log(this.myDataSource);
   //this.myDataSource.responseType = YAHOO."td[1]"util.DataSource.TYPE_HTMLTABLE;
   this.myDataSource.plug(Y.Plugin.DataSourceXMLSchema, {
     schema: {
       resultListLocator: "tr",
-      //How do we mention the locators for the fields here ?
       resultFields: [
-          {key:"row_title", locator:"td[1]" }, parser:this.parseString}, // Can we use formatter instead of parser ? What about recordType property of dataTable ? https://yuilibrary.com/yui/docs/datatable/datatable-recordtype.html
+          {key:"row_title", locator:"td[1]",},// parser:this.parseString}, // Can we use formatter instead of parser ? What about recordType property of dataTable ? https://yuilibrary.com/yui/docs/datatable/datatable-recordtype.html
           // https://yuilibrary.com/yui/docs/datatype/ The last example uses the parser attribute.
           [% i = 1 %]
           [% FOREACH col = col_names %]
             [% i = i + 1 %]
-            {key:"[% col FILTER js %]",locator:"td[[% i %]]" }, parser:this.parseNumber},
+            {key:"[% col FILTER js %]",locator:"td[[% i %]]",},// parser:this.parseNumber},
           [% END %]
-          {key:"total",locator:"td[[% i + 1 %]]", parser:this.parseNumber}
+          {key:"total",locator:"td[[% i + 1 %]]",}// parser:this.parseNumber}
       ]
     }
   });
@@ -164,7 +175,7 @@ Y.on("load", function() {
             }
         };
   this.myDataSource.sendRequest({callback : myCallback});// any config options needed ?
-  Y.log(this.myDataSource);
+  //Y.log(this.myDataSource);
   /* = {
     fields: [
       {key:"row_title", parser:this.parseString},
@@ -176,9 +187,9 @@ Y.on("load", function() {
   };
   */ 
   this.myDataTable = new Y.DataTable({
-    columns: myColumnDefs
+    columns: myColumnDefs,
   }).plug(Y.Plugin.DataTableDataSource, {
-      datasource: this.dataSource
+      datasource: this.myDataSource
   }).render("#tabular_report_container_[% tbl FILTER js %]");
   this.myDataTable.datasource.load();
     
@@ -193,7 +204,7 @@ Y.on("load", function() {
   <h2>[% tbl_disp FILTER email FILTER html %]</h2>
 [% END %]
 
-<table class="tabular_report_container">
+<table class="tabular_report_container"><!--Needed-->
   <tr>
     <td>
     </td>
@@ -213,22 +224,22 @@ Y.on("load", function() {
 [% col_idx = 0 %]
 [% row_idx = 0 %]
 [% total_key = '-total-' %]
-<div id="tabular_report_container_[% tbl FILTER html %]">
-<table id="tabular_report_[% tbl FILTER html %]" class="tabular_report">
+<div id="tabular_report_container_[% tbl FILTER html %]"> <!-- Needed -->
+<table id="tabular_report_[% tbl FILTER html %]" class="tabular_report"><!--To remove-->
   [% IF col_field %]
     <thead>
-    <tr>
-      <th class="[% classes.$row_idx.$col_idx %]">
+    <tr><!--Provides the headings for the table-->
+      <th class="[% classes.$row_idx.$col_idx %]"><!--These are the columns headings.To be provided as labels -->
       </th>
       [% FOREACH col = col_names %]
         [% NEXT IF col == "" %]
         
         [% col_idx = 1 - col_idx %]
         <th class="[% classes.$row_idx.$col_idx %]">
-          [% PROCESS value_display value = col field = col_field %]
+          [% PROCESS value_display value = col field = col_field %] <!--These are the columns headings.To be provided as labels -->
         </th>
       [% END %]
-      <th class="ttotal">
+      <th class="ttotal"><!--These are the columns headings.To be provided as labels -->
         Total
       </th>
     </tr>
@@ -237,7 +248,7 @@ Y.on("load", function() {
   <tbody>
   [% FOREACH row = row_names %]
     [% row_idx = 1 - row_idx %]
-    <tr>
+    <tr><!--Row containing the data values-->
       <td class="[% classes.$row_idx.$col_idx %] right">
         [% PROCESS value_display value = row field = row_field %]
       </td>
@@ -264,7 +275,7 @@ Y.on("load", function() {
       </td>
     </tr>
   [% END %]
-    <tr>
+    <tr><!--The last row of the table-->
       [% row_idx = 1 - row_idx %]
       <td class="ttotal">
         Total

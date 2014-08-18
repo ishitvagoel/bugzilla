@@ -226,6 +226,7 @@ function setupEditLink(id) {
 function hideEditableField( container, input, action, field_id, original_value, new_value, hide_input ) {
     Y.one('#' + container).removeClass('bz_default_hidden');
     Y.one('#' + input).addClass('bz_default_hidden');
+    Y.log(action+ " ---> " + Y.one('#' + action));
     Y.one('#' + action).on('click', showEditableField, null,
                                  new Array(container, input, field_id, new_value));
     Y.log(new Array(container, input, field_id, original_value, hide_input ));
@@ -394,8 +395,8 @@ function showHideStatusItems(e, dupArrayInfo) {
         if (resolution_settings_warning) {
             resolution_settings_warning.addClass('bz_default_hidden');
         }
-        var duplicate_display = Y.one('#duplicate_display'); //For testing
-        if(duplicate_display)
+        var duplicate_display = Y.one('#duplicate_display');
+        Y.log(duplicate_display);
         duplicate_display.addClass('bz_default_hidden');
 
 
